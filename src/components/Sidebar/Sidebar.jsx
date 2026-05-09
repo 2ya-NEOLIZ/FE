@@ -23,7 +23,7 @@ export default function Sidebar() {
       <style>
         {`
           @font-face {
-            font-family: 'NeoDonggeunmo';
+            font-family: 'NeoDunggeunmo';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.3/NeoDunggeunmo.woff') format('woff');
             font-weight: bold;
             font-display: swap;
@@ -104,7 +104,7 @@ const s = {
     top: 0,
     zIndex: 100,
     overflow: 'hidden',
-    fontFamily: 'NeoDonggeunmo, monospace',
+    fontFamily: 'NeoDunggeunmo, monospace',
   },
 
   toggleBtn: {
@@ -152,6 +152,6 @@ const s = {
     whiteSpace: 'pre',
     textAlign: 'center',
     lineHeight: 1.4,
-    fontFamily: 'NeoDonggeunmo, monospace',
+    fontFamily: 'NeoDunggeunmo, monospace',
   },
 }
