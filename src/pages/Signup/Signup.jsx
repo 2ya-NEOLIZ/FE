@@ -245,7 +245,7 @@ export default function Signup() {
         <div style={s.characterWrap}>
           {/* 실제 캐릭터 이미지로 교체 */}
           <img
-            src="/src/assets/lizard.png"
+            src="/src/assets/neoliz.png"
             alt="character"
             style={s.characterImg}
             onError={(e) => { e.target.style.display = 'none' }}
@@ -307,18 +307,19 @@ const s = {
   // 폼 영역
   formWrap: {
     flex: 1,
-    maxWidth: 480,
+    maxWidth: 600,
     display: 'flex',
     flexDirection: 'column',
     gap: 4,
   },
   title: {
-    fontSize: 32,
+    fontSize: 48,
     fontWeight: 'bold',
     color: NEON,
     margin: '0 0 32px',
     letterSpacing: 4,
     fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    textShadow: '0 0 20px rgba(0,255,128,0.5)',
   },
   fieldWrap: {
     display: 'flex',
@@ -395,13 +396,13 @@ const s = {
     alignItems: 'center',
   },
   loginText: {
-    fontSize: 13,
+    fontSize: 15,
     color: NEON,
     opacity: 0.7,
     fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
   },
   loginLink: {
-    fontSize: 13,
+    fontSize: 15,
     color: NEON,
     fontWeight: 'bold',
     cursor: 'pointer',
