@@ -113,7 +113,12 @@ export default function MalMoji() {
         <div style={s.inputArea}>
           <label style={s.label}>HINT :</label>
             <div style={s.inputWrapper}>
-              <input style={s.input} type={showHint ? 'text' : 'password'} value={MOCK_QUIZ.hint} readOnly />
+              <input
+                style={{ ...s.input, color: showHintBtn ? NEON_TEXT : `${NEON_TEXT}66`, pointerEvents: showHintBtn ? 'auto' : 'none' }}
+                type={showHintBtn ? (showHint ? 'text' : 'password') : 'text'}
+                value={showHintBtn ? MOCK_QUIZ.hint : '1회 오답 후 힌트가 공개됩니다.'}
+                readOnly
+              />
               <button style={s.eyeBtn} onClick={() => setShowHint(v => !v)} disabled={!showHintBtn || locked}>
                 <img src={showHint ? '/src/assets/view_hide.png' : '/src/assets/view.png'} style={{ width: 24, height: 24, opacity: showHintBtn ? 1 : 0.3 }} />
               </button>
