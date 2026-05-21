@@ -31,6 +31,7 @@ export default function Login() {
         email: form.email,
         password: form.password,
       })
+      localStorage.setItem('isLoggedIn', 'true')
       navigate('/')
     } catch {
       setErrors({ email: '', general: '이메일 또는 비밀번호가 올바르지 않습니다.' })
