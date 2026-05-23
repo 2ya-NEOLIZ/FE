@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
-import neolizLogo from '../../assets/neoliz-logo.png'
+import neolizLogo from '../../assets/neoliz.png'
 import neonGridVideo from '../../assets/Neon-grid-crop.mp4'
 
-const NEON = '#00ff80'
+const NEON = '#1DED83'
 const BG = '#060e0b'
 
 export default function Main() {
@@ -11,18 +11,16 @@ export default function Main() {
 
   return (
     <div style={s.root}>
-      {/* 로그인 시 네온 그리드 배경 */}
-      {isLoggedIn && (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={s.video}
-        >
-          <source src={neonGridVideo} type="video/mp4" />
-        </video>
-      )}
+      {/* 네온 그리드 배경 */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={s.video}
+      >
+        <source src={neonGridVideo} type="video/mp4" />
+      </video>
 
       <div style={s.overlay} />
 
@@ -81,7 +79,7 @@ const s = {
   logo: {
     width: 500,
     imageRendering: 'pixelated',
-    filter: 'drop-shadow(0 0 12px rgba(0,255,128,0.4))',
+    filter: 'drop-shadow(0 0 12px rgba(29,237,131,0.4))',
   },
   link: {
     color: NEON,
