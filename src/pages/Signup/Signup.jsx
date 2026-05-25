@@ -5,9 +5,12 @@ import api from '../../api/index'
 const NEON = '#00ff80'
 const BG = '#060e0b'
 
-// 유효성 검증 함수
-const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-const validatePassword = (pw) => /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(pw)
+const validateEmail = (email) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+const validatePassword = (pw) =>
+  /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(pw)
+
 const validateNickname = (nick) => {
   if (nick.length < 2 || nick.length > 10) return '2~10자로 입력해주세요.'
   if (/[!@#$%^&*(),.?":{}|<>]/.test(nick)) return '특수문자는 사용할 수 없습니다.'
@@ -43,24 +46,32 @@ export default function Signup() {
     setSuccessMsg('')
   }
 
-  // 이메일 중복 확인 (onBlur)
+  // 이메일 중복 확인
   const handleEmailBlur = async () => {
     if (!form.email) return
     if (!validateEmail(form.email)) {
-      setErrors((prev) => ({ ...prev, email: '이메일 형식이 올바르지 않습니다.' }))
+      setErrors((prev) => ({
+        ...prev,
+        email: '이메일 형식이 올바르지 않습니다.',
+      }))
       return
     }
     try {
-      await api.get(`/api/v1/neoliz/auth/check-email?email=${form.email}`)
+      await api.get(
+        `/api/v1/neoliz/auth/check-email?email=${form.email}`
+      )
       setErrors((prev) => ({ ...prev, email: '' }))
     } catch (err) {
       if (err.response?.status === 409) {
-        setErrors((prev) => ({ ...prev, email: '이미 사용 중인 이메일입니다.' }))
+        setErrors((prev) => ({
+          ...prev,
+          email: '이미 사용 중인 이메일입니다.',
+        }))
       }
     }
   }
 
-  // 닉네임 중복 확인 (onBlur)
+  // 닉네임 중복 확인
   const handleNicknameBlur = async () => {
     if (!form.nickname) return
     const validErr = validateNickname(form.nickname)
@@ -69,26 +80,38 @@ export default function Signup() {
       return
     }
     try {
-      await api.get(`/api/v1/neoliz/auth/check-nickname?nickname=${form.nickname}`)
+      await api.get(
+        `/api/v1/neoliz/auth/check-nickname?nickname=${form.nickname}`
+      )
       setErrors((prev) => ({ ...prev, nickname: '' }))
     } catch (err) {
       if (err.response?.status === 409) {
-        setErrors((prev) => ({ ...prev, nickname: '이미 사용 중인 닉네임입니다.' }))
+        setErrors((prev) => ({
+          ...prev,
+          nickname: '이미 사용 중인 닉네임입니다.',
+        }))
       }
     }
   }
 
   const handleSubmit = async () => {
-    // 클라이언트 유효성 검증
     let hasError = false
-    const newErrors = { email: '', password: '', passwordConfirm: '', nickname: '', general: '' }
+
+    const newErrors = {
+      email: '',
+      password: '',
+      passwordConfirm: '',
+      nickname: '',
+      general: '',
+    }
 
     if (!validateEmail(form.email)) {
       newErrors.email = '이메일 형식이 올바르지 않습니다.'
       hasError = true
     }
     if (!validatePassword(form.password)) {
-      newErrors.password = '8자 이상, 영문+숫자+특수문자를 포함해주세요.'
+      newErrors.password =
+        '8자 이상, 영문+숫자+특수문자를 포함해주세요.'
       hasError = true
     }
     if (form.password !== form.passwordConfirm) {
@@ -106,41 +129,47 @@ export default function Signup() {
       return
     }
 
-    // 회원가입 API 호출
     try {
       await api.post('/api/v1/neoliz/auth/signup', {
         email: form.email,
         password: form.password,
+        passwordConfirm: form.passwordConfirm,
         nickname: form.nickname,
       })
       setSuccessMsg('회원가입이 완료되었습니다.')
       setTimeout(() => navigate('/login'), 1500)
     } catch (err) {
-      setErrors((prev) => ({
-        ...prev,
-        general: '회원가입에 실패했습니다. 다시 시도해주세요.',
-      }))
+      const status = err.response?.status
+
+      if (status === 409) {
+        setErrors((prev) => ({
+          ...prev,
+          general: '이미 사용 중인 이메일 또는 닉네임입니다.',
+        }))
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          general: '회원가입에 실패했습니다. 다시 시도해주세요.',
+        }))
+      }
     }
   }
 
   return (
     <div style={s.root}>
-      {/* 우상단 음소거 버튼 */}
       <img
-            src="/src/assets/sound.png"
-            alt="muteBtn"
-            style={s.muteBtn}
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
+        src="/src/assets/sound.png"
+        alt="muteBtn"
+        style={s.muteBtn}
+        onError={(e) => (e.target.style.display = 'none')}
+      />
 
-      {/* 메인 레이아웃: 좌(폼) + 우(캐릭터) */}
       <div style={s.layout}>
-
-        {/* ── 왼쪽: 폼 영역 ── */}
+        {/* form */}
         <div style={s.formWrap}>
           <h1 style={s.title}>회원가입</h1>
 
-          {/* 이메일 */}
+          {/* email */}
           <div style={s.fieldWrap}>
             <div style={s.inputRow}>
               <input
@@ -159,7 +188,7 @@ export default function Signup() {
             {errors.email && <p style={s.errorMsg}>{errors.email}</p>}
           </div>
 
-          {/* 비밀번호 */}
+          {/* password */}
           <div style={s.fieldWrap}>
             <div style={s.inputRow}>
               <input
@@ -173,15 +202,21 @@ export default function Signup() {
                   borderColor: errors.password ? '#ff4444' : NEON,
                 }}
               />
-              <button style={s.eyeBtn} onClick={() => setShowPw(!showPw)}>
-                {/* 눈 아이콘 자리 - 실제 아이콘으로 교체 */}
-                <span style={s.eyeIcon}>{showPw ? '🙉' : '🙈'}</span>
+              <button
+                style={s.eyeBtn}
+                onClick={() => setShowPw(!showPw)}
+              >
+                <span style={s.eyeIcon}>
+                  {showPw ? '🙉' : '🙈'}
+                </span>
               </button>
             </div>
-            {errors.password && <p style={s.errorMsg}>{errors.password}</p>}
+            {errors.password && (
+              <p style={s.errorMsg}>{errors.password}</p>
+            )}
           </div>
 
-          {/* 비밀번호 확인 */}
+          {/* password confirm */}
           <div style={s.fieldWrap}>
             <div style={s.inputRow}>
               <input
@@ -192,17 +227,30 @@ export default function Signup() {
                 onChange={handleChange}
                 style={{
                   ...s.input,
-                  borderColor: errors.passwordConfirm ? '#ff4444' : NEON,
+                  borderColor: errors.passwordConfirm
+                    ? '#ff4444'
+                    : NEON,
                 }}
               />
-              <button style={s.eyeBtn} onClick={() => setShowPwConfirm(!showPwConfirm)}>
-                <span style={s.eyeIcon}>{showPwConfirm ? '🙉' : '🙈'}</span>
+              <button
+                style={s.eyeBtn}
+                onClick={() =>
+                  setShowPwConfirm(!showPwConfirm)
+                }
+              >
+                <span style={s.eyeIcon}>
+                  {showPwConfirm ? '🙉' : '🙈'}
+                </span>
               </button>
             </div>
-            {errors.passwordConfirm && <p style={s.errorMsg}>{errors.passwordConfirm}</p>}
+            {errors.passwordConfirm && (
+              <p style={s.errorMsg}>
+                {errors.passwordConfirm}
+              </p>
+            )}
           </div>
 
-          {/* 닉네임 */}
+          {/* nickname */}
           <div style={s.fieldWrap}>
             <div style={s.inputRow}>
               <input
@@ -218,40 +266,52 @@ export default function Signup() {
                 }}
               />
             </div>
-            {errors.nickname && <p style={s.errorMsg}>{errors.nickname}</p>}
+            {errors.nickname && (
+              <p style={s.errorMsg}>{errors.nickname}</p>
+            )}
           </div>
 
-          {/* 일반 에러 / 성공 메시지 */}
-          {errors.general && <p style={s.errorMsg}>{errors.general}</p>}
-          {successMsg && <p style={s.successMsg}>{successMsg}</p>}
+          {errors.general && (
+            <p style={s.errorMsg}>{errors.general}</p>
+          )}
 
-          {/* 회원가입 버튼 */}
+          {successMsg && (
+            <p style={s.successMsg}>{successMsg}</p>
+          )}
+
           <div style={s.btnRow}>
-            <button style={s.submitBtn} onClick={handleSubmit}>
+            <button
+              style={s.submitBtn}
+              onClick={handleSubmit}
+            >
               회원가입
             </button>
           </div>
 
-          {/* 로그인 이동 */}
           <div style={s.loginRow}>
-            <span style={s.loginText}>이미 계정이 있으신가요? </span>
-            <span style={s.loginLink} onClick={() => navigate('/login')}>
+            <span style={s.loginText}>
+              이미 계정이 있으신가요?
+            </span>
+            <span
+              style={s.loginLink}
+              onClick={() => navigate('/login')}
+            >
               로그인
             </span>
           </div>
         </div>
 
-        {/* ── 오른쪽: 캐릭터 이미지 자리 ── */}
+        {/* character */}
         <div style={s.characterWrap}>
-          {/* 실제 캐릭터 이미지로 교체 */}
           <img
             src="/src/assets/neoliz.png"
             alt="character"
             style={s.characterImg}
-            onError={(e) => { e.target.style.display = 'none' }}
+            onError={(e) =>
+              (e.target.style.display = 'none')
+            }
           />
         </div>
-
       </div>
     </div>
   )
@@ -263,34 +323,21 @@ const s = {
     width: '100%',
     background: BG,
     color: NEON,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontFamily:
+      '"NeoDunggeunmo", "Courier New", monospace',
     position: 'relative',
     overflow: 'hidden',
     boxSizing: 'border-box',
   },
-  gridBg: {
-    position: 'fixed',
-    left: 0, right: 0, bottom: 0,
-    height: '65%',
-    backgroundImage: `
-      linear-gradient(rgba(0,255,128,0.15) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,128,0.15) 1px, transparent 1px)
-    `,
-    backgroundSize: '48px 48px',
-    transform: 'perspective(500px) rotateX(40deg)',
-    transformOrigin: 'bottom center',
-    pointerEvents: 'none',
-    zIndex: 0,
-  },
+
   muteBtn: {
     position: 'fixed',
-    top: 16, right: 16,
+    top: 16,
+    right: 16,
     zIndex: 200,
     background: 'transparent',
-    color: NEON,
-    borderRadius: 0,
-    width: 24, height: 24,
-    fontSize: 1,
+    width: 24,
+    height: 24,
     cursor: 'pointer',
   },
   layout: {
@@ -304,7 +351,6 @@ const s = {
     gap: 40,
   },
 
-  // 폼 영역
   formWrap: {
     flex: 1,
     maxWidth: 600,
@@ -318,7 +364,8 @@ const s = {
     color: NEON,
     margin: '0 0 32px',
     letterSpacing: 4,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontFamily:
+      '"NeoDunggeunmo", "Courier New", monospace',
     textShadow: '0 0 20px rgba(0,255,128,0.5)',
   },
   fieldWrap: {
@@ -339,7 +386,8 @@ const s = {
     borderRadius: 6,
     color: NEON,
     fontSize: 15,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontFamily:
+      '"NeoDunggeunmo", "Courier New", monospace',
     outline: 'none',
     boxSizing: 'border-box',
     transition: 'border-color 0.2s',
@@ -362,13 +410,15 @@ const s = {
     color: '#ff4444',
     fontSize: 12,
     margin: '4px 0 0',
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontFamily:
+      '"NeoDunggeunmo", "Courier New", monospace',
   },
   successMsg: {
     color: NEON,
     fontSize: 13,
     margin: '4px 0',
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontFamily:
+      '"NeoDunggeunmo", "Courier New", monospace',
   },
   btnRow: {
     display: 'flex',
@@ -384,7 +434,8 @@ const s = {
     fontSize: 15,
     fontWeight: 'bold',
     cursor: 'pointer',
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontFamily:
+      '"NeoDunggeunmo", "Courier New", monospace',
     letterSpacing: 2,
     transition: 'background 0.2s',
   },
@@ -399,7 +450,8 @@ const s = {
     fontSize: 15,
     color: NEON,
     opacity: 0.7,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontFamily:
+      '"NeoDunggeunmo", "Courier New", monospace',
   },
   loginLink: {
     fontSize: 15,
@@ -407,10 +459,10 @@ const s = {
     fontWeight: 'bold',
     cursor: 'pointer',
     textDecoration: 'underline',
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontFamily:
+      '"NeoDunggeunmo", "Courier New", monospace',
   },
 
-  // 캐릭터 영역
   characterWrap: {
     flex: 1,
     display: 'flex',
