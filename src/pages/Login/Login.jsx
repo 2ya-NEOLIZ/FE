@@ -233,22 +233,6 @@ const s = {
     overflow: 'hidden',
     boxSizing: 'border-box',
   },
-  gridBg: {
-    position: 'fixed',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: '65%',
-    backgroundImage: `
-      linear-gradient(rgba(0,255,128,0.15) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,128,0.15) 1px, transparent 1px)
-    `,
-    backgroundSize: '48px 48px',
-    transform: 'perspective(500px) rotateX(40deg)',
-    transformOrigin: 'bottom center',
-    pointerEvents: 'none',
-    zIndex: 0,
-  },
 
   soundIcon: {
     position: 'fixed',
