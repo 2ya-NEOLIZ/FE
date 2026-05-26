@@ -20,6 +20,13 @@ function getWeekLabel() {
 }
 
 export default function Ranking() {
+
+  //if 문 로그인 연동 후 지우기
+  if (import.meta.env.DEV && !localStorage.getItem('accessToken')) {
+    localStorage.setItem('accessToken', 'dev-mock-token')
+    localStorage.setItem('nickname', '지우')
+  }
+
   const [rankings, setRankings] = useState([])
   const [myRank, setMyRank] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -174,6 +181,7 @@ function RankRow({ data, isMe = false, myNickname }) {
   )
 }
 
+
 const s = {
   root: {
     minHeight: '100vh',
@@ -210,157 +218,167 @@ const s = {
     padding: '40px 20px',
     boxSizing: 'border-box',
   },
+  
+  // 1. 주차 표시 크기 업
   weekLabel: {
-    fontSize: 16,
-    letterSpacing: 3,
+    fontSize: 20, // 16 -> 20
+    letterSpacing: 4,
     margin: '0 0 16px',
   },
   weekNum: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 26, // 20 -> 26
     fontWeight: 'bold',
-    margin: '0 2px',
+    margin: '0 4px',
   },
+  
+  // 2. 메인 타이틀 크기 업
   title: {
     color: NEON,
-    fontSize: 42,
+    fontSize: 54, // 42 -> 54
     fontWeight: 'bold',
-    letterSpacing: 3,
-    margin: '0 0 48px',
-    textShadow: '0 0 20px rgba(29,237,131,0.4)',
+    letterSpacing: 4,
+    margin: '0 0 56px',
+    textShadow: '0 0 24px rgba(29,237,131,0.5)',
   },
   loadingText: {
     color: NEON,
-    fontSize: 16,
+    fontSize: 20,
   },
+  
+  // 3. 포디움(1~3등) 카드 크기 업
   podium: {
     display: 'flex',
     alignItems: 'flex-end',
-    gap: 20,
-    marginBottom: 32,
+    gap: 28, // 20 -> 28
+    marginBottom: 40,
   },
   card: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     border: '2px solid',
-    borderRadius: 16,
+    borderRadius: 20, // 16 -> 20
     background: 'rgba(5,15,10,0.85)',
     position: 'relative',
   },
   cardFirst: {
-    width: 160,
-    padding: '24px 20px',
+    width: 200, // 160 -> 200
+    padding: '30px 24px',
   },
   cardNormal: {
-    width: 120,
-    padding: '16px 16px',
+    width: 150, // 120 -> 150
+    padding: '20px 20px',
   },
   meBadge: {
     position: 'absolute',
-    top: 8,
-    left: 10,
+    top: 10,
+    left: 12,
     color: '#ff4444',
-    fontSize: 12,
+    fontSize: 14, // 12 -> 14
     fontWeight: 'bold',
   },
   cardRank: {
-    fontSize: 28,
+    fontSize: 36, // 28 -> 36
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   cardNickname: {
     color: NEON,
-    fontSize: 13,
-    marginBottom: 4,
+    fontSize: 18, // 13 -> 18
+    marginBottom: 6,
     textAlign: 'center',
   },
   cardScore: {
     color: NEON,
-    fontSize: 12,
+    fontSize: 16, // 12 -> 16
     opacity: 0.8,
   },
+  
+  // 4. 리스트(4~5등 및 내 순위) 크기 업
   listWrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 10,
+    gap: 14, // 10 -> 14
     width: '100%',
-    maxWidth: 480,
+    maxWidth: 600, // 480 -> 600
   },
   myRowWrap: {
     width: '100%',
-    maxWidth: 480,
-    marginTop: 16,
+    maxWidth: 600, // 480 -> 600
+    marginTop: 20,
   },
   row: {
     display: 'flex',
     alignItems: 'center',
-    border: '1px solid',
-    borderRadius: 30,
-    padding: '10px 24px',
+    border: '2px solid', // 1px -> 2px (조금 더 선명하게)
+    borderRadius: 36,
+    padding: '16px 32px', // 10px 24px -> 16px 32px
     background: 'rgba(5,15,10,0.75)',
-    gap: 16,
+    gap: 20,
   },
   meTag: {
     color: '#ff4444',
-    fontSize: 12,
+    fontSize: 16, // 12 -> 16
     fontWeight: 'bold',
-    minWidth: 20,
+    minWidth: 28,
   },
   rowRank: {
     color: NEON,
-    fontSize: 16,
+    fontSize: 22, // 16 -> 22
     fontWeight: 'bold',
-    minWidth: 45,
+    minWidth: 60,
   },
   rowNickname: {
     color: NEON,
-    fontSize: 15,
+    fontSize: 20, // 15 -> 20
     flex: 1,
   },
   rowScore: {
     color: NEON,
-    fontSize: 14,
+    fontSize: 18, // 14 -> 18
     opacity: 0.8,
   },
+  
+  // 로그인 화면 크기도 비율에 맞춰 업
   signInBox: {
     border: `2px solid ${NEON}`,
-    borderRadius: 16,
-    width: '100%',
-    maxWidth: 900,
+    borderRadius: 20,
+    width: '100%',  
+    maxWidth: 1000,
     background: 'rgba(0,0,0,0.85)',
     overflow: 'hidden',
   },
   signInHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    padding: '16px 32px',
+    padding: '20px 40px',
     borderBottom: `1px solid ${NEON}`,
     color: NEON,
-    fontSize: 18,
-    letterSpacing: 1,
+    fontSize: 22,
+    letterSpacing: 2,
   },
   signInBody: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '120px 60px',
-    gap: 32,
+    padding: '140px 80px',
+    gap: 40,
   },
   signInTitle: {
     color: NEON,
-    fontSize: 56,
+    fontSize: 72, // 56 -> 72
     fontWeight: 'bold',
-    letterSpacing: 2,
+    letterSpacing: 3,
     margin: 0,
-    textShadow: '-3px -3px 0 #cc0000, 3px -3px 0 #cc0000, -3px 3px 0 #cc0000, 3px 3px 0 #cc0000',
+    textShadow: '-4px -4px 0 #cc0000, 4px -4px 0 #cc0000, -4px 4px 0 #cc0000, 4px 4px 0 #cc0000',
   },
   signInLink: {
     color: NEON,
-    fontSize: 28,
+    fontSize: 36, // 28 -> 36
     textDecoration: 'underline',
     cursor: 'pointer',
-    letterSpacing: 1,
+    letterSpacing: 2,
   },
 }
