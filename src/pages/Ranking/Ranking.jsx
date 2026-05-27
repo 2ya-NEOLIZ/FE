@@ -4,8 +4,31 @@ import api from '../../api/index'
 import neonGridVideo from '../../assets/Neon-grid-crop.mp4'
 
 const NEON = '#1DED83'
-const YELLOW = '#f5c518'
 const BG = '#060e0b'
+
+const RANK_THEME = {
+  1: {
+    crown: '👑',
+    color: '#FFD700',
+    glow: '0 0 32px rgba(255,215,0,0.8), 0 0 64px rgba(255,215,0,0.4)',
+    border: '2px solid #FFD700',
+    bgGradient: 'linear-gradient(160deg, rgba(255,215,0,0.2) 0%, rgba(5,15,10,0.95) 65%)',
+  },
+  2: {
+    crown: '🥈',
+    color: '#C0C0C0',
+    glow: '0 0 24px rgba(192,192,192,0.7), 0 0 48px rgba(192,192,192,0.3)',
+    border: '2px solid #C0C0C0',
+    bgGradient: 'linear-gradient(160deg, rgba(192,192,192,0.15) 0%, rgba(5,15,10,0.95) 65%)',
+  },
+  3: {
+    crown: '🥉',
+    color: '#CD7F32',
+    glow: '0 0 24px rgba(205,127,50,0.7), 0 0 48px rgba(205,127,50,0.3)',
+    border: '2px solid #CD7F32',
+    bgGradient: 'linear-gradient(160deg, rgba(205,127,50,0.15) 0%, rgba(5,15,10,0.95) 65%)',
+  },
+}
 
 function getWeekLabel() {
   const now = new Date()
@@ -50,11 +73,11 @@ export default function Ranking() {
     //   }
     // })()
     setRankings([
-      { rank: 1, nickname: '민규', score: 50000 },
-      { rank: 2, nickname: '주희',    score: 39000 },
-      { rank: 3, nickname: '주연',   score: 32000 },
-      { rank: 4, nickname: '종윤',     score: 30000 },
-      { rank: 5, nickname: '윤지',   score: 21000 },
+      { rank: 1, nickname: '민규', score: 50000, profileImage: 'https://i.pravatar.cc/150?img=1' },
+      { rank: 2, nickname: '주희', score: 39000, profileImage: 'https://i.pravatar.cc/150?img=5' },
+      { rank: 3, nickname: '주연', score: 32000, profileImage: 'https://i.pravatar.cc/150?img=3' },
+      { rank: 4, nickname: '종윤', score: 30000 },
+      { rank: 5, nickname: '윤지', score: 21000 },
     ])
     setMyRank({ rank: 398, nickname: '지우', score: 90 })
     setLoading(false)
@@ -146,20 +169,76 @@ export default function Ranking() {
 
 function RankCard({ data, isFirst = false, myNickname }) {
   const isMe = data.nickname === myNickname
+  const theme = RANK_THEME[data.rank]
+
   return (
-    <div
-      style={{
-        ...s.card,
-        ...(isFirst ? s.cardFirst : s.cardNormal),
-        borderColor: isFirst ? YELLOW : NEON,
-      }}
-    >
-      {isMe && <span style={s.meBadge}>me</span>}
-      <span style={{ ...s.cardRank, color: isFirst ? YELLOW : NEON }}>
-        {data.rank}등
+    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {/* 왕관 */}
+      <span style={{
+        fontSize: isFirst ? 36 : 28,
+        lineHeight: 1,
+        marginBottom: -8,
+        filter: `drop-shadow(0 0 8px ${theme.color})`,
+        zIndex: 1,
+      }}>
+        {theme.crown}
       </span>
-      <span style={s.cardNickname}>{data.nickname}</span>
-      <span style={s.cardScore}>{data.score?.toLocaleString()}</span>
+
+      <div
+        style={{
+          ...s.card,
+          ...(isFirst ? s.cardFirst : s.cardNormal),
+          border: theme.border,
+          background: theme.bgGradient,
+          boxShadow: theme.glow,
+        }}
+      >
+        {isMe && <span style={s.meBadge}>me</span>}
+
+        <span style={{
+          ...s.cardRank,
+          color: theme.color,
+          textShadow: `0 0 12px ${theme.color}`,
+        }}>
+          {data.rank}등
+        </span>
+
+        {/* 프로필 사진 */}
+        {data.profileImage && (
+          <div style={{
+            width: isFirst ? 110 : 86,
+            height: isFirst ? 110 : 86,
+            borderRadius: 14,
+            overflow: 'hidden',
+            border: `3px solid ${theme.color}`,
+            boxShadow: `0 0 14px ${theme.color}, 0 0 28px rgba(0,0,0,0.6)`,
+            marginBottom: 10,
+          }}>
+            <img
+              src={data.profileImage}
+              alt={data.nickname}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </div>
+        )}
+
+        <span style={{
+          ...s.cardNickname,
+          color: theme.color,
+          fontSize: isFirst ? 22 : 17,
+        }}>
+          {data.nickname}
+        </span>
+
+        <span style={{
+          ...s.cardScore,
+          color: theme.color,
+          fontSize: isFirst ? 16 : 13,
+          opacity: 0.85,
+        }}>
+          {data.score?.toLocaleString()}
+        </span>
+      </div>
     </div>
   )
 }
@@ -214,137 +293,128 @@ const s = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: '100vh',
-    padding: '40px 20px',
+    height: '100vh',
+    padding: '20px 20px',
     boxSizing: 'border-box',
+    gap: 0,
   },
-  
-  // 1. 주차 표시 크기 업
+
   weekLabel: {
-    fontSize: 20, // 16 -> 20
-    letterSpacing: 4,
-    margin: '0 0 16px',
+    fontSize: 20,
+    letterSpacing: 6,
+    margin: '0 0 6px',
   },
   weekNum: {
     color: '#fff',
-    fontSize: 26, // 20 -> 26
+    fontSize: 20,
     fontWeight: 'bold',
-    margin: '0 4px',
+    margin: '0 6px',
   },
-  
-  // 2. 메인 타이틀 크기 업
+
   title: {
     color: NEON,
-    fontSize: 54, // 42 -> 54
+    fontSize: 42,
     fontWeight: 'bold',
     letterSpacing: 4,
-    margin: '0 0 56px',
+    margin: '0 0 24px',
     textShadow: '0 0 24px rgba(29,237,131,0.5)',
   },
   loadingText: {
     color: NEON,
-    fontSize: 20,
+    fontSize: 22,
   },
-  
-  // 3. 포디움(1~3등) 카드 크기 업
+
   podium: {
     display: 'flex',
     alignItems: 'flex-end',
-    gap: 28, // 20 -> 28
-    marginBottom: 40,
+    gap: 20,
+    marginBottom: 20,
   },
   card: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    border: '2px solid',
-    borderRadius: 20, // 16 -> 20
-    background: 'rgba(5,15,10,0.85)',
+    borderRadius: 20,
     position: 'relative',
   },
   cardFirst: {
-    width: 200, // 160 -> 200
-    padding: '30px 24px',
+    width: 180,
+    padding: '20px 20px',
   },
   cardNormal: {
-    width: 150, // 120 -> 150
-    padding: '20px 20px',
+    width: 140,
+    padding: '16px 16px',
   },
   meBadge: {
     position: 'absolute',
-    top: 10,
-    left: 12,
+    top: 8,
+    left: 10,
     color: '#ff4444',
-    fontSize: 14, // 12 -> 14
+    fontSize: 13,
     fontWeight: 'bold',
   },
   cardRank: {
-    fontSize: 36, // 28 -> 36
+    fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: 10,
   },
   cardNickname: {
-    color: NEON,
-    fontSize: 18, // 13 -> 18
     marginBottom: 6,
     textAlign: 'center',
+    fontWeight: 'bold',
   },
   cardScore: {
-    color: NEON,
-    fontSize: 16, // 12 -> 16
-    opacity: 0.8,
+    letterSpacing: 1,
   },
-  
-  // 4. 리스트(4~5등 및 내 순위) 크기 업
+
   listWrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 14, // 10 -> 14
+    gap: 10,
     width: '100%',
-    maxWidth: 600, // 480 -> 600
+    maxWidth: 560,
   },
   myRowWrap: {
     width: '100%',
-    maxWidth: 600, // 480 -> 600
-    marginTop: 20,
+    maxWidth: 560,
+    marginTop: 12,
   },
   row: {
     display: 'flex',
     alignItems: 'center',
-    border: '2px solid', // 1px -> 2px (조금 더 선명하게)
+    border: '2px solid',
     borderRadius: 36,
-    padding: '16px 32px', // 10px 24px -> 16px 32px
+    padding: '12px 28px',
     background: 'rgba(5,15,10,0.75)',
-    gap: 20,
+    gap: 16,
   },
   meTag: {
     color: '#ff4444',
-    fontSize: 16, // 12 -> 16
+    fontSize: 14,
     fontWeight: 'bold',
-    minWidth: 28,
+    minWidth: 24,
   },
   rowRank: {
     color: NEON,
-    fontSize: 22, // 16 -> 22
+    fontSize: 20,
     fontWeight: 'bold',
-    minWidth: 60,
+    minWidth: 52,
   },
   rowNickname: {
     color: NEON,
-    fontSize: 20, // 15 -> 20
+    fontSize: 18,
     flex: 1,
   },
   rowScore: {
     color: NEON,
-    fontSize: 18, // 14 -> 18
+    fontSize: 17,
     opacity: 0.8,
   },
-  
-  // 로그인 화면 크기도 비율에 맞춰 업
+
   signInBox: {
     border: `2px solid ${NEON}`,
     borderRadius: 20,
-    width: '100%',  
+    width: '100%',
     maxWidth: 1000,
     background: 'rgba(0,0,0,0.85)',
     overflow: 'hidden',
@@ -368,7 +438,7 @@ const s = {
   },
   signInTitle: {
     color: NEON,
-    fontSize: 72, // 56 -> 72
+    fontSize: 72,
     fontWeight: 'bold',
     letterSpacing: 3,
     margin: 0,
@@ -376,7 +446,7 @@ const s = {
   },
   signInLink: {
     color: NEON,
-    fontSize: 36, // 28 -> 36
+    fontSize: 36,
     textDecoration: 'underline',
     cursor: 'pointer',
     letterSpacing: 2,
