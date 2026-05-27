@@ -7,7 +7,7 @@ const BG = '#060e0b'
 
 export default function Main() {
   const navigate = useNavigate()
-  const isLoggedIn = !!localStorage.getItem('isLoggedIn')
+  const isLoggedIn = !!localStorage.getItem('accessToken')  // isLoggedIn → accessToken 으로 수정
 
   return (
     <div style={s.root}>
