@@ -51,7 +51,7 @@ export default function Sidebar() {
       >
         {/* 토글 버튼 (사이드바 바깥) */}
         <img
-          src="/src/assets/play.png"
+          src="/assets/play.png"
           onClick={() => setIsOpen(v => !v)}
           alt="toggle"
           style={{
@@ -71,7 +71,7 @@ export default function Sidebar() {
         {isOpen && (
           <>
             <img
-              src="/src/assets/neoliz.png"
+              src="/assets/neoliz.png"
               alt="NEOLIZ"
               style={s.logoImg}
               onClick={() => navigate('/')}
