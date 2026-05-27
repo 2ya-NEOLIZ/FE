@@ -1,12 +1,13 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from '../../../api/index'
+import neonGridVideo from '../../../assets/Neon-grid-crop.mp4'
+import soundIcon from '../../../assets/sound.png'
 
 const NEON = '#1DED83'
 const NEON_TEXT = '#1EC770'
 const FONT = 'NeoDunggeunmo, monospace'
 const BG = '#060e0b'
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const CATEGORIES = ['동물', 'HUFS', '게임', '밈']
 const CATEGORY_MAP = { '동물': 'animal', 'HUFS': 'hufs', '게임': 'game', '밈': 'meme' }
@@ -20,18 +21,15 @@ export default function FreeMode() {
   const [loadingDetail, setLoadingDetail] = useState(false)
   const [clickedIdx, setClickedIdx] = useState(null)
 
-  // 카테고리 변경 시 목록 조회
   useEffect(() => {
     const fetchEmojis = async () => {
       setLoadingList(true)
       setEmojiList([])
       setSelectedEmoji(null)
       try {
-        const res = await fetch(`/api/v1/neoliz/emojis?category=${CATEGORY_MAP[selectedCategory]}`)
-        const json = await res.json()
-        const list = json.data?.emojis ?? []
+        const res = await api.get(`/api/v1/neoliz/emojis?category=${CATEGORY_MAP[selectedCategory]}`)
+        const list = res.data?.data?.emojis ?? []
         setEmojiList(list)
-        // 첫 번째 이모지 자동 선택 (detail 조회)
         if (list.length > 0) fetchDetail(list[0].id, selectedCategory)
       } catch (e) {
         console.error(e)
@@ -42,13 +40,11 @@ export default function FreeMode() {
     fetchEmojis()
   }, [selectedCategory])
 
-  // 이모지 단건 조회 (description 포함)
   const fetchDetail = async (id, category) => {
     setLoadingDetail(true)
     try {
-      const res = await fetch(`/api/v1/neoliz/emojis/${id}`)
-      const json = await res.json()
-      setSelectedEmoji({ ...json.data, category })
+      const res = await api.get(`/api/v1/neoliz/emojis/${id}`)
+      setSelectedEmoji({ ...res.data?.data, category })
     } catch (e) {
       console.error(e)
     } finally {
@@ -62,10 +58,6 @@ export default function FreeMode() {
     setTimeout(() => setClickedIdx(null), 160)
   }
 
-  const handleCategoryChange = (cat) => {
-    setSelectedCategory(cat)
-  }
-
   return (
     <div style={s.wrap}>
       <style>{`
@@ -77,18 +69,12 @@ export default function FreeMode() {
       `}</style>
 
       <video autoPlay loop muted style={s.bgVideo}>
-        <source src="/src/assets/Neon-grid-crop.mp4" type="video/mp4" />
+        <source src={neonGridVideo} type="video/mp4" />
       </video>
 
-      <img
-        src="/src/assets/sound.png"
-        alt="sound"
-        style={s.soundIcon}
-        onError={(e) => { e.target.style.display = 'none' }}
-      />
+      <img src={soundIcon} alt="sound" style={s.soundIcon} />
 
       <div style={s.page}>
-
         <div style={s.topBar}>
           <div style={s.tabTrack}>
             <div style={s.tabSlider} />
@@ -100,15 +86,13 @@ export default function FreeMode() {
         </div>
 
         <div style={s.body}>
-
-          {/* ── 왼쪽 ── */}
           <div style={s.left}>
             <p style={s.secLabel}>CATEGORY</p>
             <div style={s.catRow}>
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => handleCategoryChange(cat)}
+                  onClick={() => setSelectedCategory(cat)}
                   style={{
                     ...s.catBtn,
                     background: selectedCategory === cat ? NEON : 'transparent',
@@ -135,9 +119,7 @@ export default function FreeMode() {
                     style={{
                       ...s.cell,
                       transform: clickedIdx === i ? 'scale(0.88) translateY(4px)' : 'scale(1)',
-                      boxShadow: clickedIdx === i
-                        ? `2px 2px 0px ${NEON}`
-                        : `6px 6px 0px ${NEON}`,
+                      boxShadow: clickedIdx === i ? `2px 2px 0px ${NEON}` : `6px 6px 0px ${NEON}`,
                     }}
                   >
                     <img src={emoji.imageUrl} alt={emoji.name} style={s.emojiImg} />
@@ -147,9 +129,7 @@ export default function FreeMode() {
             </div>
           </div>
 
-          {/* ── 오른쪽 ── */}
           <div style={s.right}>
-
             <div style={s.panel}>
               <p style={s.panelLabel}>NOW PLAYING</p>
               {loadingDetail ? (
@@ -183,7 +163,6 @@ export default function FreeMode() {
                 {'4가지 카테고리를 만나보세요!\nEMOJI를 클릭하면 바로 재생됩니다.\n자유 모드에서 시퀀스 모드로 바꿔\n나만의 시퀀스를 만들어보세요.'}
               </p>
             </div>
-
           </div>
         </div>
       </div>

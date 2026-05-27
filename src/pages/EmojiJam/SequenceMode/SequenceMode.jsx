@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from '../../../api/index'
+import neonGridVideo from '../../../assets/Neon-grid-crop.mp4'
+import soundIcon from '../../../assets/sound.png'
 
 const NEON = '#1DED83'
 const NEON_TEXT = '#1EC770'
 const FONT = 'NeoDunggeunmo, monospace'
 const BG = '#060e0b'
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const CATEGORIES = ['동물', 'HUFS', '게임', '밈']
 const CATEGORY_MAP = { '동물': 'animal', 'HUFS': 'hufs', '게임': 'game', '밈': 'meme' }
@@ -52,9 +53,8 @@ export default function SequenceMode() {
       setLoadingList(true)
       setEmojiList([])
       try {
-        const res = await fetch(`/api/v1/neoliz/emojis?category=${CATEGORY_MAP[selectedCategory]}`)
-        const json = await res.json()
-        setEmojiList(json.data?.emojis ?? [])
+        const res = await api.get(`/api/v1/neoliz/emojis?category=${CATEGORY_MAP[selectedCategory]}`)
+        setEmojiList(res.data?.data?.emojis ?? [])
       } catch (e) {
         console.error(e)
       } finally {
@@ -156,15 +156,11 @@ export default function SequenceMode() {
       const items = slots
         .filter(s => s.emoji !== null)
         .map(s => ({ emojiId: s.emoji.id, multiplier: s.multiplier }))
-      const res = await fetch('/api/v1/neoliz/users/me/sequences', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify({ title: seqTitle, items }),
+      const res = await api.post('/api/v1/neoliz/users/me/sequences', {
+        title: seqTitle,
+        items,
       })
-      if (res.ok) setSaveResult('success')
+      if (res.status === 200 || res.status === 201) setSaveResult('success')
       else setSaveResult('error')
     } catch {
       setSaveResult('error')
@@ -193,12 +189,11 @@ export default function SequenceMode() {
 
       {/* 배경 영상 */}
       <video autoPlay loop muted style={s.bgVideo}>
-        <source src="/src/assets/Neon-grid-crop.mp4" type="video/mp4" />
+        <source src={neonGridVideo} type="video/mp4" />
       </video>
 
       {/* 우상단 사운드 */}
-      <img src="/src/assets/sound.png" alt="sound" style={s.soundIcon}
-        onError={e => { e.target.style.display = 'none' }} />
+      <img src={soundIcon} alt="sound" style={s.soundIcon} />
 
       <div style={s.page}>
 

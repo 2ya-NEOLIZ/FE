@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../api/index'
+import neonGridVideo from '../../assets/Neon-grid-crop.mp4'
+import soundIcon from '../../assets/sound.png'
+import viewIcon from '../../assets/view.png'
+import viewHideIcon from '../../assets/view_hide.png'
 
 const NEON = '#1DED83'
 const NEON_TEXT = '#1EC770'
@@ -138,11 +142,10 @@ export default function Signup() {
 
       {/* 배경 영상 */}
       <video autoPlay loop muted playsInline style={s.bgVideo}>
-        <source src="/src/assets/Neon-grid-crop.mp4" type="video/mp4" />
+        <source src={neonGridVideo} />
       </video>
 
-      <img
-        src="/src/assets/sound.png"
+      <img src={soundIcon}
         alt="sound"
         style={s.soundIcon}
         onError={(e) => { e.target.style.display = 'none' }}
@@ -180,11 +183,7 @@ export default function Signup() {
                 style={{ ...s.input, paddingRight: 56, borderColor: errors.password ? '#ff4444' : NEON }}
               />
               <button style={s.eyeBtn} onClick={() => setShowPw(!showPw)}>
-                <img
-                  src={showPw ? '/src/assets/view_hide.png' : '/src/assets/view.png'}
-                  style={{ width: 24, height: 24 }}
-                  onError={(e) => { e.target.style.display = 'none' }}
-                />
+                <img src={showPw ? viewHideIcon : viewIcon} style={{ width: 24, height: 24 }} />
               </button>
             </div>
             {errors.password && <p style={s.errorMsg}>{errors.password}</p>}
@@ -202,11 +201,7 @@ export default function Signup() {
                 style={{ ...s.input, paddingRight: 56, borderColor: errors.passwordConfirm ? '#ff4444' : NEON }}
               />
               <button style={s.eyeBtn} onClick={() => setShowPwConfirm(!showPwConfirm)}>
-                <img
-                  src={showPwConfirm ? '/src/assets/view_hide.png' : '/src/assets/view.png'}
-                  style={{ width: 24, height: 24 }}
-                  onError={(e) => { e.target.style.display = 'none' }}
-                />
+                src={showPwConfirm ? viewHideIcon : viewIcon}
               </button>
             </div>
             {errors.passwordConfirm && <p style={s.errorMsg}>{errors.passwordConfirm}</p>}

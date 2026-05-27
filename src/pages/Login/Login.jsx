@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../api/index'
+import neonGridVideo from '../../assets/Neon-grid-crop.mp4'
+import soundIcon from '../../assets/sound.png'
+import viewIcon from '../../assets/view.png'
+import viewHideIcon from '../../assets/view_hide.png'
 
 const NEON = '#1DED83'
 const NEON_TEXT = '#1EC770'
@@ -72,12 +76,11 @@ export default function Login() {
 
       {/* 배경 영상 */}
       <video autoPlay loop muted playsInline style={s.bgVideo}>
-        <source src="/src/assets/Neon-grid-crop.mp4" type="video/mp4" />
+        <source src={neonGridVideo} />
       </video>
 
       {/* 우상단 사운드 아이콘 */}
-      <img
-        src="/src/assets/sound.png"
+      <img src={soundIcon}
         alt="sound"
         style={s.soundIcon}
         onError={(e) => { e.target.style.display = 'none' }}
@@ -118,11 +121,7 @@ export default function Login() {
                 style={{ ...s.input, paddingRight: 56, borderColor: errors.general ? ERROR : NEON }}
               />
               <button style={s.eyeBtn} onClick={() => setShowPw(!showPw)}>
-                <img
-                  src={showPw ? '/src/assets/view_hide.png' : '/src/assets/view.png'}
-                  style={{ width: 24, height: 24 }}
-                  onError={(e) => { e.target.replaceWith(Object.assign(document.createElement('span'), { textContent: showPw ? '🙉' : '🙈', style: 'font-size:18px' })) }}
-                />
+                <img src={showPw ? viewHideIcon : viewIcon} style={{ width: 24, height: 24 }} />
               </button>
             </div>
             {errors.general && <p style={s.errorMsg}>{errors.general}</p>}
