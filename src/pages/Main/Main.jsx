@@ -4,13 +4,23 @@ import neonGridVideo from '../../assets/Neon-grid-crop.mp4'
 
 const NEON = '#1DED83'
 const BG = '#060e0b'
+const FONT = 'NeoDunggeunmo, monospace'  
 
 export default function Main() {
   const navigate = useNavigate()
-  const isLoggedIn = !!localStorage.getItem('accessToken')  // isLoggedIn → accessToken 으로 수정
+  const isLoggedIn = !!localStorage.getItem('accessToken')
 
   return (
     <div style={s.root}>
+      {/* 폰트 로드 */}
+      <style>{`
+        @font-face {
+          font-family: 'NeoDunggeunmo';
+          src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.3/NeoDunggeunmo.woff') format('woff');
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+      `}</style>
+
       {/* 네온 그리드 배경 */}
       <video
         autoPlay
@@ -28,11 +38,17 @@ export default function Main() {
         <img src={neolizLogo} alt="NEOLIZ" style={s.logo} />
 
         {isLoggedIn ? (
-          <span style={s.link} onClick={() => navigate('/mypage')}>
+          <span 
+            style={s.link} 
+            onClick={() => navigate('/mypage')}
+          >
             마이페이지
           </span>
         ) : (
-          <span style={s.link} onClick={() => navigate('/login')}>
+          <span 
+            style={s.link} 
+            onClick={() => navigate('/login')}
+          >
             Login
           </span>
         )}
@@ -51,6 +67,7 @@ const s = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    fontFamily: FONT,
   },
   video: {
     position: 'absolute',
@@ -84,7 +101,7 @@ const s = {
   link: {
     color: NEON,
     fontSize: 30,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontFamily: FONT,           
     textDecoration: 'underline',
     cursor: 'pointer',
     letterSpacing: 1,
