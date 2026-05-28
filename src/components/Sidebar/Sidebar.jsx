@@ -1,5 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useState } from 'react'
+import neolizImg from '../../assets/neoliz.png'   // 추가
+import playImg from '../../assets/play.png'
 
 const NEON = '#00ff80'
 
@@ -51,7 +53,7 @@ export default function Sidebar() {
       >
         {/* 토글 버튼 (사이드바 바깥) */}
         <img
-          src="/src/assets/play.png"
+          src={playImg}
           onClick={() => setIsOpen(v => !v)}
           alt="toggle"
           style={{
@@ -71,7 +73,7 @@ export default function Sidebar() {
         {isOpen && (
           <>
             <img
-              src="/src/assets/neoliz.png"
+              src={neolizImg}
               alt="NEOLIZ"
               style={s.logoImg}
               onClick={() => navigate('/')}

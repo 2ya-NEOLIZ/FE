@@ -1,5 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from '../../../api/index'
+import neonGridVideo from '../../../assets/Neon-grid-crop.mp4'
+import soundIcon from '../../../assets/sound.png'
 
 const NEON = '#1DED83'
 const NEON_TEXT = '#1EC770'
@@ -7,82 +10,52 @@ const FONT = 'NeoDunggeunmo, monospace'
 const BG = '#060e0b'
 
 const CATEGORIES = ['동물', 'HUFS', '게임', '밈']
-
-const EMOJI_IMAGES = {
-  동물: [
-    { name: '고라니', imageUrl: '/src/assets/emojis/animals/animal_1.png', description: 'ㅜㄲ에에엥에게게ㅔ에ㅔ게라이' },
-    { name: '고양이', imageUrl: '/src/assets/emojis/animals/animal_2.png', description: '야야야야야아아아ㅏㅇ아라라라라랄라오오옹ㅇㅇ미야오옹오옹' },
-    { name: '개', imageUrl: '/src/assets/emojis/animals/animal_3.png', description: '동물 이모지 설명' },
-    { name: '닭', imageUrl: '/src/assets/emojis/animals/animal_4.png', description: '동물 이모지 설명' },
-    { name: '물개', imageUrl: '/src/assets/emojis/animals/animal_5.png', description: '동물 이모지 설명' },
-    { name: '사자', imageUrl: '/src/assets/emojis/animals/animal_6.png', description: '동물 이모지 설명' },
-    { name: '소', imageUrl: '/src/assets/emojis/animals/animal_7.png', description: '동물 이모지 설명' },
-    { name: '알파카', imageUrl: '/src/assets/emojis/animals/animal_8.png', description: '동물 이모지 설명' },
-    { name: '양', imageUrl: '/src/assets/emojis/animals/animal_9.png', description: '동물 이모지 설명' },
-    { name: '염소', imageUrl: '/src/assets/emojis/animals/animal_10.png', description: '동물 이모지 설명' },
-    { name: '카피바라', imageUrl: '/src/assets/emojis/animals/animal_11.png', description: '동물 이모지 설명' },
-    { name: '코끼리', imageUrl: '/src/assets/emojis/animals/animal_12.png', description: '동물 이모지 설명' },
-  ],
-  HUFS: [
-    { name: 'HUFS1', imageUrl: '/src/assets/emojis/hufs/01.svg', description: 'HUFS 이모지 설명' },
-    { name: 'HUFS2', imageUrl: '/src/assets/emojis/hufs/02.svg', description: 'HUFS 이모지 설명' },
-    { name: 'HUFS3', imageUrl: '/src/assets/emojis/hufs/03.svg', description: 'HUFS 이모지 설명' },
-    { name: 'HUFS4', imageUrl: '/src/assets/emojis/hufs/04.svg', description: 'HUFS 이모지 설명' },
-    { name: 'HUFS5', imageUrl: '/src/assets/emojis/hufs/05.svg', description: 'HUFS 이모지 설명' },
-    { name: 'HUFS6', imageUrl: '/src/assets/emojis/hufs/06.svg', description: 'HUFS 이모지 설명' },
-    { name: 'HUFS7', imageUrl: '/src/assets/emojis/hufs/07.svg', description: 'HUFS 이모지 설명' },
-    { name: 'HUFS8', imageUrl: '/src/assets/emojis/hufs/08.svg', description: 'HUFS 이모지 설명' },
-    { name: 'HUFS9', imageUrl: '/src/assets/emojis/hufs/09.svg', description: 'HUFS 이모지 설명' },
-    { name: 'HUFS10', imageUrl: '/src/assets/emojis/hufs/10.svg', description: 'HUFS 이모지 설명' },
-    { name: 'HUFS11', imageUrl: '/src/assets/emojis/hufs/11.svg', description: 'HUFS 이모지 설명' },
-    { name: 'HUFS12', imageUrl: '/src/assets/emojis/hufs/12.svg', description: 'HUFS 이모지 설명' },
-  ],
-  게임: [
-    { name: '게임1', emoji: '🎮', description: '게임 이모지 설명' },
-    { name: '게임2', emoji: '🕹️', description: '게임 이모지 설명' },
-    { name: '게임3', emoji: '🎯', description: '게임 이모지 설명' },
-    { name: '게임4', emoji: '🎲', description: '게임 이모지 설명' },
-    { name: '게임5', emoji: '🃏', description: '게임 이모지 설명' },
-    { name: '게임6', emoji: '🎳', description: '게임 이모지 설명' },
-    { name: '게임7', emoji: '🏆', description: '게임 이모지 설명' },
-    { name: '게임8', emoji: '🎪', description: '게임 이모지 설명' },
-    { name: '게임9', emoji: '🎰', description: '게임 이모지 설명' },
-    { name: '게임10', emoji: '🧩', description: '게임 이모지 설명' },
-    { name: '게임11', emoji: '🎱', description: '게임 이모지 설명' },
-    { name: '게임12', emoji: '⚔️', description: '게임 이모지 설명' },
-  ],
-  밈: [
-    { name: '밈1', imageUrl: '/src/assets/emojis/meme_1.png', description: '밈 이모지 설명' },
-    { name: '밈2', imageUrl: '/src/assets/emojis/meme_2.png', description: '밈 이모지 설명' },
-    { name: '밈3', imageUrl: '/src/assets/emojis/meme_3.png', description: '밈 이모지 설명' },
-    { name: '밈4', imageUrl: '/src/assets/emojis/meme_4.png', description: '밈 이모지 설명' },
-    { name: '밈5', imageUrl: '/src/assets/emojis/meme_5.png', description: '밈 이모지 설명' },
-    { name: '밈6', imageUrl: '/src/assets/emojis/meme_6.png', description: '밈 이모지 설명' },
-    { name: '밈7', imageUrl: '/src/assets/emojis/meme_7.png', description: '밈 이모지 설명' },
-    { name: '밈8', imageUrl: '/src/assets/emojis/meme_8.png', description: '밈 이모지 설명' },
-    { name: '밈9', imageUrl: '/src/assets/emojis/meme_9.png', description: '밈 이모지 설명' },
-    { name: '밈10', imageUrl: '/src/assets/emojis/meme_10.png', description: '밈 이모지 설명' },
-    { name: '밈11', imageUrl: '/src/assets/emojis/meme_11.png', description: '밈 이모지 설명' },
-    { name: '밈12', imageUrl: '/src/assets/emojis/meme_12.png', description: '밈 이모지 설명' },
-  ],
-}
+const CATEGORY_MAP = { '동물': 'animal', 'HUFS': 'hufs', '게임': 'game', '밈': 'meme' }
 
 export default function FreeMode() {
   const navigate = useNavigate()
   const [selectedCategory, setSelectedCategory] = useState('동물')
-  const [selectedEmoji, setSelectedEmoji] = useState({ ...EMOJI_IMAGES['동물'][0], category: '동물' })
+  const [emojiList, setEmojiList] = useState([])
+  const [loadingList, setLoadingList] = useState(false)
+  const [selectedEmoji, setSelectedEmoji] = useState(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
   const [clickedIdx, setClickedIdx] = useState(null)
-  const audioRef = useRef(null)
+
+  useEffect(() => {
+    const fetchEmojis = async () => {
+      setLoadingList(true)
+      setEmojiList([])
+      setSelectedEmoji(null)
+      try {
+        const res = await api.get(`/api/v1/neoliz/emojis?category=${CATEGORY_MAP[selectedCategory]}`)
+        const list = res.data?.data?.emojis ?? []
+        setEmojiList(list)
+        if (list.length > 0) fetchDetail(list[0].id, selectedCategory)
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setLoadingList(false)
+      }
+    }
+    fetchEmojis()
+  }, [selectedCategory])
+
+  const fetchDetail = async (id, category) => {
+    setLoadingDetail(true)
+    try {
+      const res = await api.get(`/api/v1/neoliz/emojis/${id}`)
+      setSelectedEmoji({ ...res.data?.data, category })
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoadingDetail(false)
+    }
+  }
 
   const handleEmojiClick = (emoji, idx) => {
     setClickedIdx(idx)
-    setSelectedEmoji({ ...emoji, category: selectedCategory })
+    fetchDetail(emoji.id, selectedCategory)
     setTimeout(() => setClickedIdx(null), 160)
-  }
-
-  const handleCategoryChange = (cat) => {
-    setSelectedCategory(cat)
-    setSelectedEmoji({ ...EMOJI_IMAGES[cat][0], category: cat })
   }
 
   return (
@@ -96,18 +69,12 @@ export default function FreeMode() {
       `}</style>
 
       <video autoPlay loop muted style={s.bgVideo}>
-        <source src="/src/assets/Neon-grid-crop.mp4" type="video/mp4" />
+        <source src={neonGridVideo} type="video/mp4" />
       </video>
 
-      <img
-        src="/src/assets/sound.png"
-        alt="sound"
-        style={s.soundIcon}
-        onError={(e) => { e.target.style.display = 'none' }}
-      />
+      <img src={soundIcon} alt="sound" style={s.soundIcon} />
 
       <div style={s.page}>
-
         <div style={s.topBar}>
           <div style={s.tabTrack}>
             <div style={s.tabSlider} />
@@ -119,15 +86,13 @@ export default function FreeMode() {
         </div>
 
         <div style={s.body}>
-
-          {/* ── 왼쪽 ── */}
           <div style={s.left}>
             <p style={s.secLabel}>CATEGORY</p>
             <div style={s.catRow}>
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => handleCategoryChange(cat)}
+                  onClick={() => setSelectedCategory(cat)}
                   style={{
                     ...s.catBtn,
                     background: selectedCategory === cat ? NEON : 'transparent',
@@ -142,61 +107,37 @@ export default function FreeMode() {
 
             <p style={s.secLabel}>EMOJI</p>
             <div style={s.grid}>
-              {EMOJI_IMAGES[selectedCategory].map((emoji, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleEmojiClick(emoji, i)}
-                  style={{
-                    ...s.cell,
-                    transform: clickedIdx === i ? 'scale(0.88) translateY(4px)' : 'scale(1)',
-                    boxShadow: clickedIdx === i
-                      ? `2px 2px 0px ${NEON}`
-                      : `6px 6px 0px ${NEON}`,
-                  }}
-                >
-                  {emoji.emoji ? (
-                    <img
-                      src={`https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${
-                        [...emoji.emoji]
-                          .filter(c => c.codePointAt(0) !== 0xfe0f)
-                          .map(c => c.codePointAt(0).toString(16))
-                          .join('-')
-                      }.svg`}
-                      alt={emoji.name}
-                      style={s.emojiImg}
-                    />
-                  ) : (
-                    emoji.imageUrl && <img src={emoji.imageUrl} alt={emoji.name} style={s.emojiImg} />
-                  )}
-                </button>
-              ))}
+              {loadingList ? (
+                <p style={{ color: NEON_TEXT, opacity: 0.6, gridColumn: '1/-1', fontFamily: FONT, fontSize: 14 }}>
+                  로딩 중...
+                </p>
+              ) : (
+                emojiList.map((emoji, i) => (
+                  <button
+                    key={emoji.id}
+                    onClick={() => handleEmojiClick(emoji, i)}
+                    style={{
+                      ...s.cell,
+                      transform: clickedIdx === i ? 'scale(0.88) translateY(4px)' : 'scale(1)',
+                      boxShadow: clickedIdx === i ? `2px 2px 0px ${NEON}` : `6px 6px 0px ${NEON}`,
+                    }}
+                  >
+                    <img src={emoji.imageUrl} alt={emoji.name} style={s.emojiImg} />
+                  </button>
+                ))
+              )}
             </div>
           </div>
 
-          {/* ── 오른쪽 ── */}
           <div style={s.right}>
-
             <div style={s.panel}>
               <p style={s.panelLabel}>NOW PLAYING</p>
-              {selectedEmoji ? (
+              {loadingDetail ? (
+                <p style={{ color: NEON_TEXT, opacity: 0.6, fontFamily: FONT, fontSize: 14 }}>로딩 중...</p>
+              ) : selectedEmoji ? (
                 <div style={s.nowRow}>
                   <div style={s.nowImgBox}>
-                    {selectedEmoji.emoji ? (
-                      <img
-                        src={`https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${
-                          [...selectedEmoji.emoji]
-                            .filter(c => c.codePointAt(0) !== 0xfe0f)
-                            .map(c => c.codePointAt(0).toString(16))
-                            .join('-')
-                        }.svg`}
-                        alt={selectedEmoji.name}
-                        style={s.nowImg}
-                      />
-                    ) : selectedEmoji.imageUrl ? (
-                      <img src={selectedEmoji.imageUrl} alt={selectedEmoji.name} style={s.nowImg} />
-                    ) : (
-                      <div style={s.nowImgEmpty} />
-                    )}
+                    <img src={selectedEmoji.imageUrl} alt={selectedEmoji.name} style={s.nowImg} />
                   </div>
                   <div style={s.nowTextBox}>
                     <p style={s.nowCat}>{selectedEmoji.category}</p>
@@ -222,7 +163,6 @@ export default function FreeMode() {
                 {'4가지 카테고리를 만나보세요!\nEMOJI를 클릭하면 바로 재생됩니다.\n자유 모드에서 시퀀스 모드로 바꿔\n나만의 시퀀스를 만들어보세요.'}
               </p>
             </div>
-
           </div>
         </div>
       </div>
@@ -350,13 +290,13 @@ const s = {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
     gridTemplateRows: 'repeat(3, 1fr)',
-    columnGap: 'clamp(8px, 1.1vw, 14px)', 
+    columnGap: 'clamp(8px, 1.1vw, 14px)',
     rowGap: 'clamp(1px, 0.0vw, 2px)',
     flex: 1,
     minHeight: 0,
     overflow: 'hidden',
     padding: '2px',
-    alignContent: 'stretch',         
+    alignContent: 'stretch',
   },
 
   cell: {
@@ -409,7 +349,7 @@ const s = {
     fontFamily: FONT,
   },
 
-    nowRow: {
+  nowRow: {
     display: 'flex',
     gap: 20,
     alignItems: 'flex-start',
@@ -431,17 +371,17 @@ const s = {
     objectFit: 'contain',
   },
 
-  nowTextBox: { 
+  nowTextBox: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center',  
+    justifyContent: 'center',
     gap: 6,
   },
 
   nowCat: {
     fontSize: 'clamp(12px, 1.1vw, 15px)',
-    color: NEON_TEXT, 
+    color: NEON_TEXT,
     opacity: 0.6,
     margin: 0,
     fontFamily: FONT,
@@ -450,7 +390,7 @@ const s = {
 
   nowName: {
     fontSize: 'clamp(18px, 1.8vw, 26px)',
-    fontWeight: 'bold', 
+    fontWeight: 'bold',
     color: NEON_TEXT,
     margin: '4px 0 10px 0',
     fontFamily: FONT,
@@ -461,7 +401,7 @@ const s = {
     background: 'rgba(0,0,0,0.35)',
     borderRadius: 8,
     padding: '12px 14px',
-    marginTop: 'auto',          
+    marginTop: 'auto',
   },
 
   nowDescText: {
@@ -471,6 +411,13 @@ const s = {
     whiteSpace: 'pre-line',
     margin: 0,
     fontFamily: FONT,
+  },
+
+  emptyText: {
+    color: NEON_TEXT,
+    opacity: 0.5,
+    fontFamily: FONT,
+    fontSize: 'clamp(13px, 1.2vw, 16px)',
   },
 
   seqBtn: {

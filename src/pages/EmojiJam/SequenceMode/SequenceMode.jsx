@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from '../../../api/index'
+import neonGridVideo from '../../../assets/Neon-grid-crop.mp4'
+import soundIcon from '../../../assets/sound.png'
 
 const NEON = '#1DED83'
 const NEON_TEXT = '#1EC770'
@@ -7,83 +10,14 @@ const FONT = 'NeoDunggeunmo, monospace'
 const BG = '#060e0b'
 
 const CATEGORIES = ['동물', 'HUFS', '게임', '밈']
+const CATEGORY_MAP = { '동물': 'animal', 'HUFS': 'hufs', '게임': 'game', '밈': 'meme' }
 const MULTIPLIERS = [0.5, 1, 1.5, 2]
 const MAX_SLOTS = 4
 
-const EMOJI_IMAGES = {
-  동물: [
-    { id: 'animal_1', name: '고라니', imageUrl: '/src/assets/emojis/animals/animal_1.png' },
-    { id: 'animal_2', name: '고양이', imageUrl: '/src/assets/emojis/animals/animal_2.png' },
-    { id: 'animal_3', name: '개', imageUrl: '/src/assets/emojis/animals/animal_3.png' },
-    { id: 'animal_4', name: '닭', imageUrl: '/src/assets/emojis/animals/animal_4.png' },
-    { id: 'animal_5', name: '물개', imageUrl: '/src/assets/emojis/animals/animal_5.png' },
-    { id: 'animal_6', name: '사자', imageUrl: '/src/assets/emojis/animals/animal_6.png' },
-    { id: 'animal_7', name: '소', imageUrl: '/src/assets/emojis/animals/animal_7.png' },
-    { id: 'animal_8', name: '알파카', imageUrl: '/src/assets/emojis/animals/animal_8.png' },
-    { id: 'animal_9', name: '양', imageUrl: '/src/assets/emojis/animals/animal_9.png' },
-    { id: 'animal_10', name: '염소', imageUrl: '/src/assets/emojis/animals/animal_10.png' },
-    { id: 'animal_11', name: '카피바라', imageUrl: '/src/assets/emojis/animals/animal_11.png' },
-    { id: 'animal_12', name: '코끼리', imageUrl: '/src/assets/emojis/animals/animal_12.png' },
-  ],
-  HUFS: [
-    { id: 'hufs_1', name: 'HUFS1', imageUrl: '/src/assets/emojis/hufs/01.svg' },
-    { id: 'hufs_2', name: 'HUFS2', imageUrl: '/src/assets/emojis/hufs/02.svg' },
-    { id: 'hufs_3', name: 'HUFS3', imageUrl: '/src/assets/emojis/hufs/03.svg' },
-    { id: 'hufs_4', name: 'HUFS4', imageUrl: '/src/assets/emojis/hufs/04.svg' },
-    { id: 'hufs_5', name: 'HUFS5', imageUrl: '/src/assets/emojis/hufs/05.svg' },
-    { id: 'hufs_6', name: 'HUFS6', imageUrl: '/src/assets/emojis/hufs/06.svg' },
-    { id: 'hufs_7', name: 'HUFS7', imageUrl: '/src/assets/emojis/hufs/07.svg' },
-    { id: 'hufs_8', name: 'HUFS8', imageUrl: '/src/assets/emojis/hufs/08.svg' },
-    { id: 'hufs_9', name: 'HUFS9', imageUrl: '/src/assets/emojis/hufs/09.svg' },
-    { id: 'hufs_10', name: 'HUFS10', imageUrl: '/src/assets/emojis/hufs/10.svg' },
-    { id: 'hufs_11', name: 'HUFS11', imageUrl: '/src/assets/emojis/hufs/11.svg' },
-    { id: 'hufs_12', name: 'HUFS12', imageUrl: '/src/assets/emojis/hufs/12.svg' },
-  ],
-  게임: [
-    { id: 'game_1', name: '게임1', emoji: '🎮' },
-    { id: 'game_2', name: '게임2', emoji: '🕹️' },
-    { id: 'game_3', name: '게임3', emoji: '🎯' },
-    { id: 'game_4', name: '게임4', emoji: '🎲' },
-    { id: 'game_5', name: '게임5', emoji: '🃏' },
-    { id: 'game_6', name: '게임6', emoji: '🎳' },
-    { id: 'game_7', name: '게임7', emoji: '🏆' },
-    { id: 'game_8', name: '게임8', emoji: '🎪' },
-    { id: 'game_9', name: '게임9', emoji: '🎰' },
-    { id: 'game_10', name: '게임10', emoji: '🧩' },
-    { id: 'game_11', name: '게임11', emoji: '🎱' },
-    { id: 'game_12', name: '게임12', emoji: '⚔️' },
-  ],
-  밈: [
-    { id: 'meme_1', name: '밈1', imageUrl: '/src/assets/emojis/meme_1.png' },
-    { id: 'meme_2', name: '밈2', imageUrl: '/src/assets/emojis/meme_2.png' },
-    { id: 'meme_3', name: '밈3', imageUrl: '/src/assets/emojis/meme_3.png' },
-    { id: 'meme_4', name: '밈4', imageUrl: '/src/assets/emojis/meme_4.png' },
-    { id: 'meme_5', name: '밈5', imageUrl: '/src/assets/emojis/meme_5.png' },
-    { id: 'meme_6', name: '밈6', imageUrl: '/src/assets/emojis/meme_6.png' },
-    { id: 'meme_7', name: '밈7', imageUrl: '/src/assets/emojis/meme_7.png' },
-    { id: 'meme_8', name: '밈8', imageUrl: '/src/assets/emojis/meme_8.png' },
-    { id: 'meme_9', name: '밈9', imageUrl: '/src/assets/emojis/meme_9.png' },
-    { id: 'meme_10', name: '밈10', imageUrl: '/src/assets/emojis/meme_10.png' },
-    { id: 'meme_11', name: '밈11', imageUrl: '/src/assets/emojis/meme_11.png' },
-    { id: 'meme_12', name: '밈12', imageUrl: '/src/assets/emojis/meme_12.png' },
-  ],
-}
-
-// 트위모지 src 생성 헬퍼
-function twemojiSrc(emojiStr) {
-  return `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${
-    [...emojiStr]
-      .filter(c => c.codePointAt(0) !== 0xfe0f)
-      .map(c => c.codePointAt(0).toString(16))
-      .join('-')
-  }.svg`
-}
-
-// 이모지 이미지 렌더 헬퍼
+// 이모지 이미지 렌더 헬퍼 (API는 항상 imageUrl 반환)
 function EmojiImg({ emoji, style }) {
-  if (emoji.emoji) return <img src={twemojiSrc(emoji.emoji)} alt={emoji.name} style={style} />
-  if (emoji.imageUrl) return <img src={emoji.imageUrl} alt={emoji.name} style={style} />
-  return null
+  if (!emoji?.imageUrl) return null
+  return <img src={emoji.imageUrl} alt={emoji.name} style={style} />
 }
 
 // 빈 슬롯 초기값
@@ -93,26 +27,44 @@ const initSlots = () => Array.from({ length: MAX_SLOTS }, () => ({ ...EMPTY_SLOT
 export default function SequenceMode() {
   const navigate = useNavigate()
   const [selectedCategory, setSelectedCategory] = useState('동물')
+  const [emojiList, setEmojiList] = useState([])
+  const [loadingList, setLoadingList] = useState(false)
   const [slots, setSlots] = useState(initSlots())
   const slotsRef = useRef(slots)
   useEffect(() => { slotsRef.current = slots }, [slots])
 
-  const [playingIdx, setPlayingIdx] = useState(null)   // 재생 중 하이라이트 인덱스
+  const [playingIdx, setPlayingIdx] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const playTimerRef = useRef(null)
 
   // 모달 상태
-  const [showFullModal, setShowFullModal] = useState(false)     // 4칸 꽉 찼을 때
-  const [showDeleteModal, setShowDeleteModal] = useState(false) // 전체 삭제 확인
-  const [showSaveModal, setShowSaveModal] = useState(false)     // 저장
+  const [showFullModal, setShowFullModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showSaveModal, setShowSaveModal] = useState(false)
   const [seqTitle, setSeqTitle] = useState('')
-  const [saveResult, setSaveResult] = useState(null)            // 'success' | 'error' | null
+  const [saveResult, setSaveResult] = useState(null) // 'success' | 'error' | null
 
-  // ── 드래그앤드롭 (native HTML5) ──
+  // 드래그앤드롭
   const draggingEmoji = useRef(null)
 
+  // 카테고리 변경 시 목록 조회
+  useEffect(() => {
+    const fetchEmojis = async () => {
+      setLoadingList(true)
+      setEmojiList([])
+      try {
+        const res = await api.get(`/api/v1/neoliz/emojis?category=${CATEGORY_MAP[selectedCategory]}`)
+        setEmojiList(res.data?.data?.emojis ?? [])
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setLoadingList(false)
+      }
+    }
+    fetchEmojis()
+  }, [selectedCategory])
+
   const handleDragStart = (emoji) => {
-    // 재생 중 드래그 lock
     if (isPlaying) return
     draggingEmoji.current = emoji
   }
@@ -130,7 +82,6 @@ export default function SequenceMode() {
     if (!isOccupied) {
       const filled = current.filter(s => s.emoji !== null).length
       if (filled >= MAX_SLOTS) {
-        // 이미 꽉 찬 상태에서 빈 슬롯 드롭 시도 → 모달
         setShowFullModal(true)
         return
       }
@@ -139,7 +90,6 @@ export default function SequenceMode() {
     setSlots(prev => {
       const next = [...prev]
       next[slotIdx] = { emoji, multiplier: prev[slotIdx].multiplier || 1 }
-      // 드롭 후 4칸 다 찼으면 모달 (렌더 완료 후 띄우기)
       const filledAfter = next.filter(s => s.emoji !== null).length
       if (filledAfter >= MAX_SLOTS) setTimeout(() => setShowFullModal(true), 0)
       return next
@@ -156,7 +106,7 @@ export default function SequenceMode() {
     })
   }
 
-  // 재생 (소리 없이 하이라이트만)
+  // 재생 (soundUrl 활용)
   const handlePlay = () => {
     if (isPlaying) return
     const filled = slots.map((s, i) => ({ ...s, i })).filter(s => s.emoji)
@@ -170,11 +120,17 @@ export default function SequenceMode() {
         return
       }
       setPlayingIdx(filled[step].i)
-      // TODO: 소리 재생 (filled[step].emoji.soundUrl)
+      // soundUrl로 실제 오디오 재생
+      if (filled[step].emoji?.soundUrl) {
+        const audio = new Audio(filled[step].emoji.soundUrl)
+        audio.play().catch(() => {})
+      }
+      // multiplier 기반 재생 간격 (기본 800ms 기준)
+      const interval = 800 * (filled[step].multiplier ?? 1)
       playTimerRef.current = setTimeout(() => {
         step++
         next()
-      }, 800)
+      }, interval)
     }
     next()
   }
@@ -193,22 +149,18 @@ export default function SequenceMode() {
     handleStop()
   }
 
-  // 저장 (이모지 1개 이상이면 가능, 빈 슬롯 제외하고 전송)
+  // 저장
   const handleSave = async () => {
     if (!seqTitle.trim()) return
     try {
       const items = slots
         .filter(s => s.emoji !== null)
-        .map(s => ({ emojiId: s.emoji?.id, multiplier: s.multiplier }))
-      const res = await fetch('/api/v1/neoliz/users/me/sequences', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify({ title: seqTitle, items }),
+        .map(s => ({ emojiId: s.emoji.id, multiplier: s.multiplier }))
+      const res = await api.post('/api/v1/neoliz/users/me/sequences', {
+        title: seqTitle,
+        items,
       })
-      if (res.ok) setSaveResult('success')
+      if (res.status === 200 || res.status === 201) setSaveResult('success')
       else setSaveResult('error')
     } catch {
       setSaveResult('error')
@@ -229,7 +181,6 @@ export default function SequenceMode() {
           src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.3/NeoDunggeunmo.woff') format('woff');
         }
         *, *::before, *::after { box-sizing: border-box; }
-        /* emoji 리스트 전용 스크롤바 */
         .emoji-list::-webkit-scrollbar { width: 8px; }
         .emoji-list::-webkit-scrollbar-track { background: transparent; }
         .emoji-list::-webkit-scrollbar-thumb { background: #1DED83; border-radius: 999px; border: 1px solid #062b1d; }
@@ -238,12 +189,11 @@ export default function SequenceMode() {
 
       {/* 배경 영상 */}
       <video autoPlay loop muted style={s.bgVideo}>
-        <source src="/src/assets/Neon-grid-crop.mp4" type="video/mp4" />
+        <source src={neonGridVideo} type="video/mp4" />
       </video>
 
       {/* 우상단 사운드 */}
-      <img src="/src/assets/sound.png" alt="sound" style={s.soundIcon}
-        onError={e => { e.target.style.display = 'none' }} />
+      <img src={soundIcon} alt="sound" style={s.soundIcon} />
 
       <div style={s.page}>
 
@@ -279,18 +229,23 @@ export default function SequenceMode() {
             <p style={s.secLabel}>EMOJI</p>
             {/* 스크롤 가능한 이모지 2열 그리드 */}
             <div className="emoji-list" style={s.emojiList}>
-              {EMOJI_IMAGES[selectedCategory].map(emoji => (
-                <div key={emoji.id} draggable={!isPlaying}
-                  onDragStart={() => handleDragStart(emoji)}
-                  style={{
-                    ...s.emojiListCell,
-                    // 재생 중 드래그 불가 시각 표시
-                    opacity: isPlaying ? 0.4 : 1,
-                    cursor: isPlaying ? 'not-allowed' : 'grab',
-                  }}>
-                  <EmojiImg emoji={emoji} style={s.emojiImg} />
-                </div>
-              ))}
+              {loadingList ? (
+                <p style={{ color: NEON_TEXT, opacity: 0.6, gridColumn: '1/-1', fontFamily: FONT, fontSize: 14 }}>
+                  로딩 중...
+                </p>
+              ) : (
+                emojiList.map(emoji => (
+                  <div key={emoji.id} draggable={!isPlaying}
+                    onDragStart={() => handleDragStart(emoji)}
+                    style={{
+                      ...s.emojiListCell,
+                      opacity: isPlaying ? 0.4 : 1,
+                      cursor: isPlaying ? 'not-allowed' : 'grab',
+                    }}>
+                    <EmojiImg emoji={emoji} style={s.emojiImg} />
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -461,7 +416,6 @@ const s = {
     overflow: 'hidden',
   },
 
-  // 상단 모드탭
   topBar: {
     display: 'flex', justifyContent: 'center',
     marginBottom: 'clamp(14px, 2.2vh, 32px)', flexShrink: 0,
@@ -488,13 +442,11 @@ const s = {
     zIndex: 2, cursor: 'pointer', fontFamily: FONT, letterSpacing: 1,
   },
 
-  // 본문
   body: {
     display: 'flex', gap: 'clamp(20px, 3vw, 40px)',
     flex: 1, minHeight: 0, overflow: 'hidden',
   },
 
-  // 왼쪽
   left: {
     width: 'clamp(220px, 24vw, 320px)',
     display: 'flex', flexDirection: 'column',
@@ -531,18 +483,16 @@ const s = {
   },
   emojiImg: { width: '80%', height: '80%', objectFit: 'contain' },
 
-  // 오른쪽
   right: {
-    flex: 1, display: 'flex', 
+    flex: 1, display: 'flex',
     flexDirection: 'column',
-    minWidth: 0, 
+    minWidth: 0,
     overflow: 'hidden',
     paddingTop: 'clamp(36px, 14vh, 140px)',
     gap: 'clamp(28px, 6vh, 50px)',
-
   },
   rightTop: {
-    display: 'flex', 
+    display: 'flex',
     flexDirection: 'column',
   },
   seqTitle: {
@@ -554,7 +504,6 @@ const s = {
     opacity: 0.7, margin: '0 0 clamp(16px, 2.5vh, 32px)', fontFamily: FONT,
   },
 
-  // 슬롯
   slotRow: {
     display: 'flex', gap: 'clamp(10px, 1.5vw, 24px)',
     flexShrink: 0,
@@ -572,7 +521,6 @@ const s = {
   slotImg: { width: '75%', height: '75%', objectFit: 'contain' },
   slotEmpty: { fontSize: 'clamp(20px, 2.5vw, 36px)', color: NEON_TEXT, opacity: 0.3 },
 
-  // 배율 버튼 2x2
   multGrid: {
     display: 'grid', gridTemplateColumns: '1fr 1fr',
     gap: 'clamp(4px, 0.4vw, 6px)', width: '100%',
@@ -584,7 +532,6 @@ const s = {
     fontFamily: FONT, transition: 'all 0.12s',
   },
 
-  // 하단 컨트롤 버튼
   ctrlRow: {
     display: 'flex', gap: 'clamp(18px, 3vw, 40px)',
     justifyContent: 'center',
@@ -599,7 +546,6 @@ const s = {
     boxShadow: `3px 3px 0 ${NEON}`, transition: 'box-shadow 0.12s, opacity 0.12s',
   },
 
-  // 아이콘 (CSS로 직접 그리기)
   stopIcon: {
     width: 'clamp(14px, 1.6vw, 22px)', height: 'clamp(14px, 1.6vw, 22px)',
     background: NEON, borderRadius: 2,
@@ -628,7 +574,6 @@ const s = {
     border: `2.5px solid ${NEON}`, borderRadius: '0 0 3px 3px',
   },
 
-  // 모달
   modalOverlay: {
     position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 500,
