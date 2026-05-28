@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useState } from 'react'
-import neolizImg from '../../assets/neoliz.png'   // 추가
+import api from '../../api/index'
+import neolizImg from '../../assets/neoliz.png'
 import playImg from '../../assets/play.png'
 
 const NEON = '#00ff80'
@@ -28,12 +29,24 @@ export default function Sidebar() {
   const hidePaths = ['/', '/login', '/signup']
   if (hidePaths.includes(location.pathname)) return null
 
-  // 이모지잼 경로인지 확인
   const isEmojiJam = location.pathname.startsWith('/emoji-jam')
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/api/v1/neoliz/auth/logout')
+    } catch (e) {
+      // 서버 오류여도 클라이언트 로그아웃은 진행
+      console.error('로그아웃 API 오류:', e)
+    } finally {
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('nickname')
+      navigate('/')
+    }
+  }
 
   return (
     <>
-      {/* 폰트 등록 */}
       <style>
         {`
           @font-face {
@@ -45,13 +58,8 @@ export default function Sidebar() {
         `}
       </style>
 
-      <div
-        style={{
-          ...s.sidebar,
-          width: isOpen ? 90 : 0,
-        }}
-      >
-        {/* 토글 버튼 (사이드바 바깥) */}
+      <div style={{ ...s.sidebar, width: isOpen ? 90 : 0 }}>
+        {/* 토글 버튼 */}
         <img
           src={playImg}
           onClick={() => setIsOpen(v => !v)}
@@ -64,44 +72,37 @@ export default function Sidebar() {
             zIndex: 999,
             transition: 'left 0.3s ease',
           }}
-          onError={(e) => {
-            e.target.style.display = 'none'
-          }}
+          onError={e => { e.target.style.display = 'none' }}
         />
 
-        {/* 로고 */}
         {isOpen && (
           <>
+            {/* 로고 */}
             <img
               src={neolizImg}
               alt="NEOLIZ"
               style={s.logoImg}
               onClick={() => navigate('/')}
-              onError={(e) => { e.target.style.display = 'none' }}
+              onError={e => { e.target.style.display = 'none' }}
             />
 
             {/* 메뉴 */}
             <div style={s.menuWrap}>
               {SIDEBAR_ITEMS.map((item) => {
                 const isActive = location.pathname.startsWith(item.path)
-
                 return (
                   <div key={item.label} style={s.itemWrap}>
-                    {/* 메인 메뉴 버튼 */}
                     <button
                       onClick={() => navigate(item.path)}
                       style={{
                         ...s.item,
-                        background: isActive 
-                          ? 'rgba(0,255,128,0.15)' 
-                          : 'transparent',
+                        background: isActive ? 'rgba(0,255,128,0.15)' : 'transparent',
                         borderColor: isActive ? NEON : '#1e4a2e',
                       }}
                     >
                       <span style={s.itemLabel}>{item.label}</span>
                     </button>
 
-                    {/* 이모지잼 서브메뉴 */}
                     {item.subItems && isEmojiJam && isActive && (
                       <div style={s.subMenu}>
                         {item.subItems.map((sub) => {
@@ -127,6 +128,18 @@ export default function Sidebar() {
                   </div>
                 )
               })}
+            </div>
+
+            {/* 로그아웃 버튼 (하단 고정) */}
+            <div style={s.bottomWrap}>
+              <button
+                onClick={handleLogout}
+                style={s.logoutBtn}
+                title="로그아웃"
+              >
+                <span style={s.logoutIcon}>⏻</span>
+                <span style={s.logoutLabel}>로그아웃</span>
+              </button>
             </div>
           </>
         )}
@@ -174,6 +187,7 @@ const s = {
     gap: 10,
     width: '100%',
     alignItems: 'center',
+    flex: 1,
   },
   itemWrap: {
     display: 'flex',
@@ -222,5 +236,39 @@ const s = {
     textAlign: 'left',
     transition: 'all 0.15s',
     whiteSpace: 'nowrap',
+  },
+
+  // 하단 로그아웃
+  bottomWrap: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    paddingBottom: 20,
+    marginTop: 'auto',
+  },
+  logoutBtn: {
+    width: 60,
+    borderRadius: 12,
+    background: 'transparent',
+    color: '#ff6b6b',
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    padding: '8px 0',
+    transition: 'all 0.2s',
+    fontFamily: 'NeoDunggeunmo, monospace',
+  },
+  logoutIcon: {
+    fontSize: 18,
+    lineHeight: 1,
+  },
+  logoutLabel: {
+    fontSize: 9,
+    whiteSpace: 'nowrap',
+    lineHeight: 1.2,
+    color: '#ff6b6b',
   },
 }

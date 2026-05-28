@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../../api/index'
 import neonGridVideo from '../../../assets/Neon-grid-crop.mp4'
@@ -21,6 +21,9 @@ export default function FreeMode() {
   const [loadingDetail, setLoadingDetail] = useState(false)
   const [clickedIdx, setClickedIdx] = useState(null)
 
+  // 사운드 재생을 위한 ref (중복 재생 방지)
+  const audioRef = useRef(null)
+
   useEffect(() => {
     const fetchEmojis = async () => {
       setLoadingList(true)
@@ -30,7 +33,7 @@ export default function FreeMode() {
         const res = await api.get(`/api/v1/neoliz/emojis?category=${CATEGORY_MAP[selectedCategory]}`)
         const list = res.data?.data?.emojis ?? []
         setEmojiList(list)
-        if (list.length > 0) fetchDetail(list[0].id, selectedCategory)
+        if (list.length > 0) fetchDetail(list[0].id)
       } catch (e) {
         console.error(e)
       } finally {
@@ -40,11 +43,28 @@ export default function FreeMode() {
     fetchEmojis()
   }, [selectedCategory])
 
-  const fetchDetail = async (id, category) => {
+  const playSound = (soundUrl) => {
+    if (!soundUrl) return
+    // 이전 오디오 중지
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
+    const audio = new Audio(soundUrl)
+    audioRef.current = audio
+    audio.play().catch(err => console.error('사운드 재생 실패:', err))
+  }
+
+  const fetchDetail = async (id) => {
     setLoadingDetail(true)
     try {
       const res = await api.get(`/api/v1/neoliz/emojis/${id}`)
-      setSelectedEmoji({ ...res.data?.data, category })
+      const data = res.data?.data
+      setSelectedEmoji(data)
+      // 상세 조회 후 soundUrl이 있으면 재생
+      if (data?.soundUrl) {
+        playSound(data.soundUrl)
+      }
     } catch (e) {
       console.error(e)
     } finally {
@@ -54,9 +74,19 @@ export default function FreeMode() {
 
   const handleEmojiClick = (emoji, idx) => {
     setClickedIdx(idx)
-    fetchDetail(emoji.id, selectedCategory)
+    fetchDetail(emoji.id)
     setTimeout(() => setClickedIdx(null), 160)
   }
+
+  // 컴포넌트 언마운트 시 오디오 정리
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+    }
+  }, [])
 
   return (
     <div style={s.wrap}>
@@ -140,11 +170,19 @@ export default function FreeMode() {
                     <img src={selectedEmoji.imageUrl} alt={selectedEmoji.name} style={s.nowImg} />
                   </div>
                   <div style={s.nowTextBox}>
-                    <p style={s.nowCat}>{selectedEmoji.category}</p>
+                    {/* category: API가 영문 카테고리 반환하면 한글 매핑 */}
+                    <p style={s.nowCat}>
+                      {Object.entries(CATEGORY_MAP).find(([, v]) => v === selectedEmoji.category)?.[0]
+                        ?? selectedEmoji.category}
+                    </p>
                     <p style={s.nowName}>{selectedEmoji.name}</p>
-                    <div style={s.nowDescBox}>
-                      <p style={s.nowDescText}>{selectedEmoji.description}</p>
-                    </div>
+                    {selectedEmoji.description ? (
+                      <div style={s.nowDescBox}>
+                        <p style={s.nowDescText}>{selectedEmoji.description}</p>
+                      </div>
+                    ) : (
+                      <p style={{ ...s.nowDescText, opacity: 0.4 }}>설명 없음</p>
+                    )}
                   </div>
                 </div>
               ) : (
