@@ -201,7 +201,7 @@ export default function Signup() {
                 style={{ ...s.input, paddingRight: 56, borderColor: errors.passwordConfirm ? '#ff4444' : NEON }}
               />
               <button style={s.eyeBtn} onClick={() => setShowPwConfirm(!showPwConfirm)}>
-                src={showPwConfirm ? viewHideIcon : viewIcon}
+                <img src={showPwConfirm ? viewHideIcon : viewIcon} style={{ width: 24, height: 24 }} />
               </button>
             </div>
             {errors.passwordConfirm && <p style={s.errorMsg}>{errors.passwordConfirm}</p>}
