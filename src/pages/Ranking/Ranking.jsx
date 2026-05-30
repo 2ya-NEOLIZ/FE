@@ -44,6 +44,12 @@ function getWeekLabel() {
 
 export default function Ranking() {
 
+  //if 문 로그인 연동 후 지우기
+  if (import.meta.env.DEV && !localStorage.getItem('accessToken')) {
+    localStorage.setItem('accessToken', 'dev-mock-token')
+    localStorage.setItem('nickname', '지우')
+  }
+
   const [rankings, setRankings] = useState([])
   const [myRank, setMyRank] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -53,18 +59,28 @@ export default function Ranking() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    ;(async () => {
-      try {
-        const res = await api.get('/api/v1/neoliz/ranking/weekly')
-        setRankings(res.data.rankings ?? [])
-        setMyRank(res.data.myRank ?? null)
-      } catch {
-        setRankings([])
-        setMyRank(null)
-      } finally {
-        setLoading(false)
-      }
-    })()
+    // TODO: API 연동 후 아래 목업 제거 후 주석 해제
+    // ;(async () => {
+    //   try {
+    //     const res = await api.get('/api/v1/neoliz/ranking/weekly')
+    //     setRankings(res.data.rankings ?? [])
+    //     setMyRank(res.data.myRank ?? null)
+    //   } catch {
+    //     setRankings([])
+    //     setMyRank(null)
+    //   } finally {
+    //     setLoading(false)
+    //   }
+    // })()
+    setRankings([
+      { rank: 1, nickname: '민규', score: 50000, profileImage: 'https://i.pravatar.cc/150?img=1' },
+      { rank: 2, nickname: '주희', score: 39000, profileImage: 'https://i.pravatar.cc/150?img=5' },
+      { rank: 3, nickname: '주연', score: 32000, profileImage: 'https://i.pravatar.cc/150?img=3' },
+      { rank: 4, nickname: '종윤', score: 30000 },
+      { rank: 5, nickname: '윤지', score: 21000 },
+    ])
+    setMyRank({ rank: 398, nickname: '지우', score: 90 })
+    setLoading(false)
   }, [])
 
   const top3 = rankings.slice(0, 3)
