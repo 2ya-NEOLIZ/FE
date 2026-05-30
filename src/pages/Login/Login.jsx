@@ -1,8 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../api/index'
+import neonGridVideo from '../../assets/Neon-grid-crop.mp4'
+import soundIcon from '../../assets/sound.png'
+import viewIcon from '../../assets/View.png'
+import viewHideIcon from '../../assets/View_hide.png'
 
-const NEON = '#00ff80'
+const NEON = '#1DED83'
+const NEON_TEXT = '#1EC770'
+const FONT = 'NeoDunggeunmo, monospace'
 const BG = '#060e0b'
 const ERROR = '#ff4444'
 
@@ -27,13 +33,28 @@ export default function Login() {
       return
     }
     try {
-      await api.post('/api/v1/neoliz/auth/login', {
+      const res = await api.post('/api/v1/neoliz/auth/login', {
         email: form.email,
         password: form.password,
       })
+      const { accessToken, refreshToken, user } = res.data.data
+
+      localStorage.setItem('accessToken', accessToken)
+      localStorage.setItem('refreshToken', refreshToken)
+      localStorage.setItem('nickname', user.nickname)
+      localStorage.setItem('userId', String(user.id))
+      if (user.profileImageUrl) {
+        localStorage.setItem('profileImageUrl', user.profileImageUrl)
+      }
+
       navigate('/')
-    } catch {
-      setErrors({ email: '', general: '이메일 또는 비밀번호가 올바르지 않습니다.' })
+    } catch (err) {
+      const status = err.response?.status
+      if (status === 401) {
+        setErrors({ email: '', general: '이메일 또는 비밀번호가 올바르지 않습니다.' })
+      } else {
+        setErrors({ email: '', general: '로그인에 실패했습니다. 다시 시도해주세요.' })
+      }
     }
   }
 
@@ -42,12 +63,24 @@ export default function Login() {
   }
 
   return (
-    <div style={s.root}>
-      <div style={s.gridBg} />
+    <div style={s.wrap}>
+      <style>{`
+        @font-face {
+          font-family: 'NeoDunggeunmo';
+          src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.3/NeoDunggeunmo.woff') format('woff');
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        input::placeholder { color: ${NEON_TEXT}55; }
+        input:focus { outline: none; }
+      `}</style>
+
+      {/* 배경 영상 */}
+      <video autoPlay loop muted playsInline style={s.bgVideo}>
+        <source src={neonGridVideo} />
+      </video>
 
       {/* 우상단 사운드 아이콘 */}
-      <img
-        src="/src/assets/sound.png"
+      <img src={soundIcon}
         alt="sound"
         style={s.soundIcon}
         onError={(e) => { e.target.style.display = 'none' }}
@@ -69,10 +102,7 @@ export default function Login() {
               value={form.email}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
-              style={{
-                ...s.input,
-                borderColor: errors.email ? ERROR : NEON,
-              }}
+              style={{ ...s.input, borderColor: errors.email ? ERROR : NEON }}
             />
             {errors.email && <p style={s.errorMsg}>{errors.email}</p>}
           </div>
@@ -88,34 +118,24 @@ export default function Login() {
                 value={form.password}
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
-                style={{
-                  ...s.input,
-                  paddingRight: 48,
-                  borderColor: errors.general ? ERROR : NEON,
-                }}
+                style={{ ...s.input, paddingRight: 56, borderColor: errors.general ? ERROR : NEON }}
               />
               <button style={s.eyeBtn} onClick={() => setShowPw(!showPw)}>
-                {/* 눈 아이콘 자리 - 실제 아이콘으로 교체 */}
-                <span style={s.eyeIcon}>{showPw ? '🙉' : '🙈'}</span>
+                <img src={showPw ? viewHideIcon : viewIcon} style={{ width: 24, height: 24 }} />
               </button>
             </div>
-            {/* 로그인 실패 에러 - 비밀번호 인풋 아래 표시 */}
             {errors.general && <p style={s.errorMsg}>{errors.general}</p>}
           </div>
 
           {/* 로그인 버튼 */}
           <div style={s.btnRow}>
-            <button style={s.loginBtn} onClick={handleSubmit}>
-              로그인
-            </button>
+            <button style={s.submitBtn} onClick={handleSubmit}>로그인</button>
           </div>
         </div>
 
         {/* 하단 회원가입 링크 */}
         <div style={s.signupRow}>
-          <span style={s.signupLink} onClick={() => navigate('/signup')}>
-            회원가입
-          </span>
+          <span style={s.signupLink} onClick={() => navigate('/signup')}>회원가입</span>
         </div>
       </div>
     </div>
@@ -123,141 +143,88 @@ export default function Login() {
 }
 
 const s = {
-  root: {
-    minHeight: '100vh',
-    width: '100%',
-    background: BG,
-    color: NEON,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
-    position: 'relative',
-    overflow: 'hidden',
-    boxSizing: 'border-box',
+  wrap: {
+    display: 'flex', flexDirection: 'column',
+    minHeight: '100vh', background: BG,
+    fontFamily: FONT, color: NEON,
+    position: 'relative', overflow: 'hidden',
   },
-
+  bgVideo: {
+    position: 'absolute', top: 0, left: 0,
+    width: '100%', height: '100%',
+    objectFit: 'cover', zIndex: 0, opacity: 0.7,
+  },
   soundIcon: {
-    position: 'fixed',
-    top: 16, right: 16,
-    zIndex: 200,
-    width: 24, height: 24,
-    cursor: 'pointer',
+    position: 'fixed', top: 14, right: 14,
+    zIndex: 300, width: 26, height: 26, cursor: 'pointer',
   },
   center: {
-    position: 'relative',
-    zIndex: 10,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    padding: '40px 20px',
-    boxSizing: 'border-box',
+    position: 'relative', zIndex: 1,
+    display: 'flex', flexDirection: 'column',
+    alignItems: 'center', justifyContent: 'center',
+    minHeight: '100vh', padding: '40px 20px',
   },
   title: {
-    fontSize: 52,
-    fontWeight: 'bold',
-    color: NEON,
-    margin: '0 0 12px',
-    letterSpacing: 8,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
-    textShadow: '0 0 20px rgba(0,255,128,0.5)',
+    fontSize: 52, fontWeight: 'bold', color: NEON_TEXT,
+    margin: '0 0 12px', letterSpacing: 8, fontFamily: FONT,
+    textShadow: `0 0 24px ${NEON}88`,
   },
   subtitle: {
-    fontSize: 20,
-    color: NEON,
-    margin: '0 0 40px',
-    letterSpacing: 2,
-    opacity: 0.85,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontSize: 18, color: NEON_TEXT, margin: '0 0 40px',
+    letterSpacing: 2, opacity: 0.7, fontFamily: FONT,
   },
   formWrap: {
-    width: '100%',
-    maxWidth: 480,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 4,
+    width: '100%', maxWidth: 520,
+    display: 'flex', flexDirection: 'column', gap: 4,
   },
   fieldWrap: {
-    display: 'flex',
-    flexDirection: 'column',
-    marginBottom: 16,
+    display: 'flex', flexDirection: 'column', marginBottom: 20,
   },
   label: {
-    fontSize: 18,
-    color: NEON,
-    margin: '0 0 6px',
-    letterSpacing: 1,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontSize: 22, color: NEON_TEXT, margin: '0 0 8px',
+    letterSpacing: 2, fontFamily: FONT,
   },
   inputRow: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
+    position: 'relative', display: 'flex', alignItems: 'center',
   },
   input: {
-    width: '100%',
-    padding: '14px 16px',
-    background: 'rgba(0,20,10,0.7)',
-    border: `2px solid ${NEON}`,
-    borderRadius: 6,
-    color: NEON,
-    fontSize: 15,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
-    outline: 'none',
-    boxSizing: 'border-box',
+    width: '100%', padding: '16px 20px',
+    background: '#0E0E17',
+    border: `1px solid ${NEON}`,
+    borderRadius: 2, color: NEON_TEXT, fontSize: 18,
+    fontFamily: FONT, outline: 'none',
+    boxShadow: `8px 8px 0px ${NEON}`,
     transition: 'border-color 0.2s',
   },
   eyeBtn: {
-    position: 'absolute',
-    right: 12,
-    background: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    padding: 0,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  eyeIcon: {
-    fontSize: 18,
-    opacity: 0.7,
+    position: 'absolute', right: 16,
+    background: 'transparent', border: 'none',
+    cursor: 'pointer', padding: 0,
+    display: 'flex', alignItems: 'center',
   },
   errorMsg: {
-    color: ERROR,
-    fontSize: 12,
-    margin: '4px 0 0',
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    color: ERROR, fontSize: 13, margin: '6px 0 0', fontFamily: FONT,
   },
   btnRow: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginTop: 16,
+    display: 'flex', justifyContent: 'flex-end', marginTop: 8,
   },
-  loginBtn: {
-    padding: '12px 48px',
-    background: 'transparent',
-    border: `2px solid ${NEON}`,
-    borderRadius: 6,
-    color: NEON,
-    fontSize: 15,
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
-    letterSpacing: 2,
-    transition: 'background 0.2s',
+  submitBtn: {
+    padding: '16px 48px',
+    background: '#0E0E17',
+    border: `1px solid ${NEON}`,
+    borderRadius: 2, color: NEON_TEXT,
+    fontSize: 20, fontWeight: 'bold', cursor: 'pointer',
+    fontFamily: FONT, letterSpacing: 2,
+    boxShadow: `8px 8px 0px ${NEON}`,
+    transition: 'opacity 0.15s',
   },
   signupRow: {
-    width: '100%',
-    maxWidth: 480,
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginTop: 24,
+    width: '100%', maxWidth: 520,
+    display: 'flex', justifyContent: 'flex-end', marginTop: 24,
   },
   signupLink: {
-    fontSize: 15,
-    color: NEON,
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    textDecoration: 'underline',
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
-    letterSpacing: 1,
+    fontSize: 16, color: NEON_TEXT, fontWeight: 'bold',
+    cursor: 'pointer', textDecoration: 'underline',
+    fontFamily: FONT, letterSpacing: 1, opacity: 0.8,
   },
 }

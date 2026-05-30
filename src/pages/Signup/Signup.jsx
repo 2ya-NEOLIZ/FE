@@ -1,13 +1,22 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../api/index'
+import neonGridVideo from '../../assets/Neon-grid-crop.mp4'
+import soundIcon from '../../assets/sound.png'
+import viewIcon from '../../assets/View.png'
+import viewHideIcon from '../../assets/View_hide.png'
 
-const NEON = '#00ff80'
+const NEON = '#1DED83'
+const NEON_TEXT = '#1EC770'
+const FONT = 'NeoDunggeunmo, monospace'
 const BG = '#060e0b'
 
-// 유효성 검증 함수
-const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-const validatePassword = (pw) => /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(pw)
+const validateEmail = (email) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+const validatePassword = (pw) =>
+  /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(pw)
+
 const validateNickname = (nick) => {
   if (nick.length < 2 || nick.length > 10) return '2~10자로 입력해주세요.'
   if (/[!@#$%^&*(),.?":{}|<>]/.test(nick)) return '특수문자는 사용할 수 없습니다.'
@@ -43,7 +52,6 @@ export default function Signup() {
     setSuccessMsg('')
   }
 
-  // 이메일 중복 확인 (onBlur)
   const handleEmailBlur = async () => {
     if (!form.email) return
     if (!validateEmail(form.email)) {
@@ -60,7 +68,6 @@ export default function Signup() {
     }
   }
 
-  // 닉네임 중복 확인 (onBlur)
   const handleNicknameBlur = async () => {
     if (!form.nickname) return
     const validErr = validateNickname(form.nickname)
@@ -79,7 +86,6 @@ export default function Signup() {
   }
 
   const handleSubmit = async () => {
-    // 클라이언트 유효성 검증
     let hasError = false
     const newErrors = { email: '', password: '', passwordConfirm: '', nickname: '', general: '' }
 
@@ -101,42 +107,51 @@ export default function Signup() {
       hasError = true
     }
 
-    if (hasError) {
-      setErrors(newErrors)
-      return
-    }
+    if (hasError) { setErrors(newErrors); return }
 
-    // 회원가입 API 호출
     try {
       await api.post('/api/v1/neoliz/auth/signup', {
         email: form.email,
         password: form.password,
+        passwordConfirm: form.passwordConfirm,
         nickname: form.nickname,
       })
       setSuccessMsg('회원가입이 완료되었습니다.')
       setTimeout(() => navigate('/login'), 1500)
     } catch (err) {
-      setErrors((prev) => ({
-        ...prev,
-        general: '회원가입에 실패했습니다. 다시 시도해주세요.',
-      }))
+      const status = err.response?.status
+      if (status === 409) {
+        setErrors((prev) => ({ ...prev, general: '이미 사용 중인 이메일 또는 닉네임입니다.' }))
+      } else {
+        setErrors((prev) => ({ ...prev, general: '회원가입에 실패했습니다. 다시 시도해주세요.' }))
+      }
     }
   }
 
   return (
-    <div style={s.root}>
-      {/* 우상단 음소거 버튼 */}
-      <img
-            src="/src/assets/sound.png"
-            alt="muteBtn"
-            style={s.muteBtn}
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
+    <div style={s.wrap}>
+      <style>{`
+        @font-face {
+          font-family: 'NeoDunggeunmo';
+          src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.3/NeoDunggeunmo.woff') format('woff');
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        input::placeholder { color: ${NEON_TEXT}55; }
+        input:focus { outline: none; }
+      `}</style>
 
-      {/* 메인 레이아웃: 좌(폼) + 우(캐릭터) */}
-      <div style={s.layout}>
+      {/* 배경 영상 */}
+      <video autoPlay loop muted playsInline style={s.bgVideo}>
+        <source src={neonGridVideo} />
+      </video>
 
-        {/* ── 왼쪽: 폼 영역 ── */}
+      <img src={soundIcon}
+        alt="sound"
+        style={s.soundIcon}
+        onError={(e) => { e.target.style.display = 'none' }}
+      />
+
+      <div style={s.center}>
         <div style={s.formWrap}>
           <h1 style={s.title}>회원가입</h1>
 
@@ -150,10 +165,7 @@ export default function Signup() {
                 value={form.email}
                 onChange={handleChange}
                 onBlur={handleEmailBlur}
-                style={{
-                  ...s.input,
-                  borderColor: errors.email ? '#ff4444' : NEON,
-                }}
+                style={{ ...s.input, borderColor: errors.email ? '#ff4444' : NEON }}
               />
             </div>
             {errors.email && <p style={s.errorMsg}>{errors.email}</p>}
@@ -168,14 +180,10 @@ export default function Signup() {
                 placeholder="비밀번호"
                 value={form.password}
                 onChange={handleChange}
-                style={{
-                  ...s.input,
-                  borderColor: errors.password ? '#ff4444' : NEON,
-                }}
+                style={{ ...s.input, paddingRight: 56, borderColor: errors.password ? '#ff4444' : NEON }}
               />
               <button style={s.eyeBtn} onClick={() => setShowPw(!showPw)}>
-                {/* 눈 아이콘 자리 - 실제 아이콘으로 교체 */}
-                <span style={s.eyeIcon}>{showPw ? '🙉' : '🙈'}</span>
+                <img src={showPw ? viewHideIcon : viewIcon} style={{ width: 24, height: 24 }} />
               </button>
             </div>
             {errors.password && <p style={s.errorMsg}>{errors.password}</p>}
@@ -190,13 +198,10 @@ export default function Signup() {
                 placeholder="비밀번호 확인"
                 value={form.passwordConfirm}
                 onChange={handleChange}
-                style={{
-                  ...s.input,
-                  borderColor: errors.passwordConfirm ? '#ff4444' : NEON,
-                }}
+                style={{ ...s.input, paddingRight: 56, borderColor: errors.passwordConfirm ? '#ff4444' : NEON }}
               />
               <button style={s.eyeBtn} onClick={() => setShowPwConfirm(!showPwConfirm)}>
-                <span style={s.eyeIcon}>{showPwConfirm ? '🙉' : '🙈'}</span>
+                <img src={showPwConfirm ? viewHideIcon : viewIcon} style={{ width: 24, height: 24 }} />
               </button>
             </div>
             {errors.passwordConfirm && <p style={s.errorMsg}>{errors.passwordConfirm}</p>}
@@ -212,216 +217,110 @@ export default function Signup() {
                 value={form.nickname}
                 onChange={handleChange}
                 onBlur={handleNicknameBlur}
-                style={{
-                  ...s.input,
-                  borderColor: errors.nickname ? '#ff4444' : NEON,
-                }}
+                style={{ ...s.input, borderColor: errors.nickname ? '#ff4444' : NEON }}
               />
             </div>
             {errors.nickname && <p style={s.errorMsg}>{errors.nickname}</p>}
           </div>
 
-          {/* 일반 에러 / 성공 메시지 */}
           {errors.general && <p style={s.errorMsg}>{errors.general}</p>}
           {successMsg && <p style={s.successMsg}>{successMsg}</p>}
 
-          {/* 회원가입 버튼 */}
           <div style={s.btnRow}>
-            <button style={s.submitBtn} onClick={handleSubmit}>
-              회원가입
-            </button>
+            <button style={s.submitBtn} onClick={handleSubmit}>회원가입</button>
           </div>
 
-          {/* 로그인 이동 */}
           <div style={s.loginRow}>
-            <span style={s.loginText}>이미 계정이 있으신가요? </span>
-            <span style={s.loginLink} onClick={() => navigate('/login')}>
-              로그인
-            </span>
+            <span style={s.loginText}>이미 계정이 있으신가요?</span>
+            <span style={s.loginLink} onClick={() => navigate('/login')}>로그인</span>
           </div>
         </div>
-
-        {/* ── 오른쪽: 캐릭터 이미지 자리 ── */}
-        <div style={s.characterWrap}>
-          {/* 실제 캐릭터 이미지로 교체 */}
-          <img
-            src="/src/assets/neoliz.png"
-            alt="character"
-            style={s.characterImg}
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-        </div>
-
       </div>
     </div>
   )
 }
 
 const s = {
-  root: {
-    minHeight: '100vh',
-    width: '100%',
-    background: BG,
-    color: NEON,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
-    position: 'relative',
-    overflow: 'hidden',
-    boxSizing: 'border-box',
+  wrap: {
+    display: 'flex', flexDirection: 'column',
+    minHeight: '100vh', background: BG,
+    fontFamily: FONT, color: NEON,
+    position: 'relative', overflow: 'hidden',
   },
-  gridBg: {
-    position: 'fixed',
-    left: 0, right: 0, bottom: 0,
-    height: '65%',
-    backgroundImage: `
-      linear-gradient(rgba(0,255,128,0.15) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,128,0.15) 1px, transparent 1px)
-    `,
-    backgroundSize: '48px 48px',
-    transform: 'perspective(500px) rotateX(40deg)',
-    transformOrigin: 'bottom center',
-    pointerEvents: 'none',
-    zIndex: 0,
+  bgVideo: {
+    position: 'absolute', top: 0, left: 0,
+    width: '100%', height: '100%',
+    objectFit: 'cover', zIndex: 0, opacity: 0.7,
   },
-  muteBtn: {
-    position: 'fixed',
-    top: 16, right: 16,
-    zIndex: 200,
-    background: 'transparent',
-    color: NEON,
-    borderRadius: 0,
-    width: 24, height: 24,
-    fontSize: 1,
-    cursor: 'pointer',
+  soundIcon: {
+    position: 'fixed', top: 14, right: 14,
+    zIndex: 300, width: 26, height: 26, cursor: 'pointer',
   },
-  layout: {
-    position: 'relative',
-    zIndex: 10,
-    display: 'flex',
-    alignItems: 'center',
-    minHeight: '100vh',
-    padding: '40px 60px',
-    boxSizing: 'border-box',
-    gap: 40,
+  center: {
+    position: 'relative', zIndex: 1,
+    display: 'flex', flexDirection: 'column',
+    alignItems: 'center', justifyContent: 'center',
+    minHeight: '100vh', padding: '40px 20px',
   },
-
-  // 폼 영역
   formWrap: {
-    flex: 1,
-    maxWidth: 600,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 4,
+    width: '100%', maxWidth: 520,
+    display: 'flex', flexDirection: 'column', gap: 4,
   },
   title: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: NEON,
-    margin: '0 0 32px',
-    letterSpacing: 4,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
-    textShadow: '0 0 20px rgba(0,255,128,0.5)',
+    fontSize: 48, fontWeight: 'bold', color: NEON_TEXT,
+    margin: '0 0 32px', letterSpacing: 6, fontFamily: FONT,
+    textShadow: `0 0 24px ${NEON}88`,
   },
   fieldWrap: {
-    display: 'flex',
-    flexDirection: 'column',
-    marginBottom: 12,
+    display: 'flex', flexDirection: 'column', marginBottom: 16,
   },
   inputRow: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
+    position: 'relative', display: 'flex', alignItems: 'center',
   },
   input: {
-    width: '100%',
-    padding: '14px 48px 14px 16px',
-    background: 'rgba(0,255,128,0.05)',
-    border: `2px solid ${NEON}`,
-    borderRadius: 6,
-    color: NEON,
-    fontSize: 15,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
-    outline: 'none',
-    boxSizing: 'border-box',
+    width: '100%', padding: '16px 20px',
+    background: '#0E0E17',
+    border: `1px solid ${NEON}`,
+    borderRadius: 2, color: NEON_TEXT, fontSize: 18,
+    fontFamily: FONT, outline: 'none',
+    boxShadow: `8px 8px 0px ${NEON}`,
     transition: 'border-color 0.2s',
   },
   eyeBtn: {
-    position: 'absolute',
-    right: 12,
-    background: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    padding: 0,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  eyeIcon: {
-    fontSize: 18,
-    opacity: 0.7,
+    position: 'absolute', right: 16,
+    background: 'transparent', border: 'none',
+    cursor: 'pointer', padding: 0,
+    display: 'flex', alignItems: 'center',
   },
   errorMsg: {
-    color: '#ff4444',
-    fontSize: 12,
-    margin: '4px 0 0',
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    color: '#ff4444', fontSize: 13, margin: '6px 0 0', fontFamily: FONT,
   },
   successMsg: {
-    color: NEON,
-    fontSize: 13,
-    margin: '4px 0',
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    color: NEON_TEXT, fontSize: 14, margin: '4px 0', fontFamily: FONT,
   },
   btnRow: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginTop: 8,
+    display: 'flex', justifyContent: 'flex-end', marginTop: 8,
   },
   submitBtn: {
-    padding: '12px 32px',
-    background: 'transparent',
-    border: `2px solid ${NEON}`,
-    borderRadius: 6,
-    color: NEON,
-    fontSize: 15,
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
-    letterSpacing: 2,
-    transition: 'background 0.2s',
+    padding: '16px 48px',
+    background: '#0E0E17',
+    border: `1px solid ${NEON}`,
+    borderRadius: 2, color: NEON_TEXT,
+    fontSize: 20, fontWeight: 'bold', cursor: 'pointer',
+    fontFamily: FONT, letterSpacing: 2,
+    boxShadow: `8px 8px 0px ${NEON}`,
+    transition: 'opacity 0.15s',
   },
   loginRow: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginTop: 24,
-    gap: 4,
-    alignItems: 'center',
+    display: 'flex', justifyContent: 'flex-end',
+    marginTop: 24, gap: 6, alignItems: 'center',
   },
   loginText: {
-    fontSize: 15,
-    color: NEON,
-    opacity: 0.7,
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
+    fontSize: 15, color: NEON_TEXT, opacity: 0.7, fontFamily: FONT,
   },
   loginLink: {
-    fontSize: 15,
-    color: NEON,
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    textDecoration: 'underline',
-    fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
-  },
-
-  // 캐릭터 영역
-  characterWrap: {
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 300,
-  },
-  characterImg: {
-    maxWidth: '120%',
-    maxHeight: 480,
-    objectFit: 'contain',
-    imageRendering: 'pixelated',
+    fontSize: 15, color: NEON_TEXT, fontWeight: 'bold',
+    cursor: 'pointer', textDecoration: 'underline',
+    fontFamily: FONT, letterSpacing: 1,
   },
 }
