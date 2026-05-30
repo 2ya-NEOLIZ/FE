@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Modal from '../../components/Modal/Modal'
 import neonGridVideo from '../../assets/Neon-grid-crop.mp4'
 import dellFillIcon from '../../assets/Dell_fill.png'
@@ -13,6 +13,7 @@ const PAGE_SIZE = 4
 
 export default function MyPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [sequences, setSequences] = useState([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -26,6 +27,7 @@ export default function MyPage() {
   const [nickInput, setNickInput] = useState('')
   const [nickError, setNickError] = useState('')
   const [playingIdx, setPlayingIdx] = useState(null)
+  const [refreshKey, setRefreshKey] = useState(0)
   const playTimerRef = useRef(null)
   const fileInputRef = useRef(null)
 
@@ -36,7 +38,7 @@ export default function MyPage() {
       const { data } = await api.get('/api/v1/neoliz/users/me')
       if (data.data) {
         setUserInfo(data.data)
-        setNickname(data.data.nickname)
+        setNickname(data.data?.nickname ?? '닉네임')
       }
     }
     fetchUser()
@@ -56,7 +58,7 @@ export default function MyPage() {
       }
     }
     fetchSequences()
-  }, [page])
+  }, [page, location.key, refreshKey])
 
   const handlePlaySeq = async (seq) => {
     if (isPlaying) {
@@ -114,16 +116,7 @@ export default function MyPage() {
     if (sequences.length === 1 && page > 1) {
       setPage(p => p - 1)
     } else {
-      const { data } = await api.get(`/api/v1/neoliz/users/me/sequences?page=${page - 1}&size=${PAGE_SIZE}`)
-      if (data.data) {
-        setSequences(
-          data.data.sequences.map(s => ({
-            ...s,
-            date: s.createdAt?.slice(0, 10).replace(/-/g, '.'),
-          }))
-        )
-        setTotalPages(data.data.totalPages || 1)
-      }
+      setRefreshKey(k => k + 1)
     }
   }
 
@@ -208,9 +201,9 @@ export default function MyPage() {
                     setNickError('특수문자는 사용할 수 없습니다.')
                     return
                   }
-                  await api.patch('/api/v1/neoliz/users/me/nickname', { nickname: trimmed })
+                  const { data } = await api.patch('/api/v1/neoliz/users/me/nickname', { nickname: trimmed })
                   setNickError('')
-                  setNickname(trimmed)
+                  setNickname(data.data?.nickname ?? trimmed)
                   setEditingNick(false)
                 }}
                 onKeyDown={e => e.key === 'Enter' && e.target.blur()}
@@ -274,7 +267,7 @@ export default function MyPage() {
 }
 
 const s = {
-  wrap:         { display: 'flex', flexDirection: 'column', background: '#060e0b', fontFamily: FONT, color: NEON, position: 'relative', minheight: '100vh', overflow: 'visible' },
+  wrap:         { display: 'flex', flexDirection: 'column', background: '#060e0b', fontFamily: FONT, color: NEON, position: 'relative', minHeight: '100vh', overflow: 'visible' },
   bgVideo:      { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, opacity: 0.7 },
   title:        { position: 'absolute', top: 64, left: '50%', transform: 'translateX(-50%)', fontSize: 80, color: NEON, fontFamily: FONT, zIndex: 2, letterSpacing: 4, margin: 0 },
   content:      { position: 'relative', marginTop: 32, zIndex: 1, display: 'flex', flexDirection: 'row', overflow: 'visible', alignItems: 'flex-start', justifyContent: 'center', flex: 1, gap: 60, padding: '180px 4% 40px', flexWrap: 'wrap' },
