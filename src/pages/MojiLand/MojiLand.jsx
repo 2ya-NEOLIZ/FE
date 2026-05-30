@@ -29,6 +29,10 @@ const HOW_TO_PLAY = `START 버튼을 누르면 바로 라운드가 시작됩니�
 연속으로 성공하면 콤보 BONUS를 획득할 수 있습니다.
 단, Miss하면 콤보는 초기화됩니다.`
 
+const getAuthHeader = () => ({
+  Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+})
+
 export default function MojiLand() {
   const navigate = useNavigate()
 
@@ -74,26 +78,27 @@ export default function MojiLand() {
 
   // ── 플레이 가능 여부 조회 ──
   const fetchStatus = async () => {
-    // TODO: 실제 API 연동 시 아래 주석 해제
-    // try {
-    //   const res = await fetch('/api/v1/neoliz/catch/status', {
-    //     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-    //   })
-    //   if (res.status === 401) {
-    //     openModal('로그인 후 플레이할 수 있습니다.', () => { closeModal(); navigate('/login') })
-    //     return false
-    //   }
-    //   const data = await res.json()
-    //   if (!data.data.isPlayable) {
-    //     openModal(`오늘 플레이 횟수를 모두 사용했습니다.\n내일 다시 도전하세요! (${data.data.maxPlays}회/일)`, closeModal)
-    //     return false
-    //   }
-    //   return true
-    // } catch {
-    //   openModal('네트워크 오류가 발생했습니다.', closeModal)
-    //   return false
-    // }
-    return true
+    try {
+      const res = await fetch('/api/v1/neoliz/catch/status', {
+        headers: getAuthHeader(),
+      })
+      if (res.status === 401) {
+        openModal('로그인 후 플레이할 수 있습니다.', () => { closeModal(); navigate('/login') })
+        return false
+      }
+      const data = await res.json()
+      if (!data.data.isPlayable) {
+        openModal(
+          `오늘 플레이 횟수를 모두 사용했습니다.\n내일 다시 도전하세요! (${data.data.maxPlays}회/일)`,
+          closeModal
+        )
+        return false
+      }
+      return true
+    } catch {
+      openModal('네트워크 오류가 발생했습니다.', closeModal)
+      return false
+    }
   }
 
   const startGame = async () => {
@@ -106,36 +111,26 @@ export default function MojiLand() {
     const canPlay = await fetchStatus()
     if (!canPlay) return
 
-    // TODO: 실제 API 연동 시 아래 주석 해제
-    // try {
-    //   const res = await fetch('/api/v1/neoliz/catch/start', {
-    //     method: 'POST',
-    //     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-    //   })
-    //   if (res.status === 403) {
-    //     openModal('오늘 플레이 횟수를 모두 사용했습니다.', closeModal)
-    //     return
-    //   }
-    //   const data = await res.json()
-    //   setGameId(data.data.gameId)
-    //   setRounds(data.data.rounds)
-    //   startCountdown()
-    // } catch {
-    //   openModal('게임 시작에 실패했습니다.', closeModal)
-    // }
-
-    const mockRounds = Array.from({ length: 10 }, (_, i) => ({
-      round: i + 1,
-      emojiId: i + 1,
-      imageUrl: null,
-      soundUrl: null,
-      perfectZone: { start: 0.43 - i * 0.01, end: 0.57 + i * 0.01 },
-      goodZone: { start: 0.33 - i * 0.01, end: 0.67 + i * 0.01 },
-      barSpeed: 1.0 + i * 0.08,
-    }))
-    setGameId('mock-game-id')
-    setRounds(mockRounds)
-    startCountdown()
+    try {
+      const res = await fetch('/api/v1/neoliz/catch/start', {
+        method: 'POST',
+        headers: getAuthHeader(),
+      })
+      if (res.status === 403) {
+        openModal('오늘 플레이 횟수를 모두 사용했습니다.', closeModal)
+        return
+      }
+      if (!res.ok) {
+        openModal('게임 시작에 실패했습니다.', closeModal)
+        return
+      }
+      const data = await res.json()
+      setGameId(data.data.gameId)
+      setRounds(data.data.rounds)
+      startCountdown()
+    } catch {
+      openModal('게임 시작에 실패했습니다.', closeModal)
+    }
   }
 
   // ── 카운트다운 ──
@@ -192,6 +187,12 @@ export default function MojiLand() {
     if (markerRef.current) markerRef.current.style.left = '0px'
     setJudgment(null)
 
+    // 라운드 시작 시 사운드 재생
+    if (rounds[currentRound].soundUrl) {
+      const audio = new Audio(rounds[currentRound].soundUrl)
+      audio.play().catch(() => {})
+    }
+
     startBar(rounds[currentRound].barSpeed || 1.0)
     return () => stopBar()
   }, [phase, currentRound, rounds, startBar, stopBar])
@@ -237,34 +238,39 @@ export default function MojiLand() {
     const goodCount = allResults.filter(r => r.judgment === 'GOOD').length
     const missCount = allResults.filter(r => r.judgment === 'MISS').length
 
-    // TODO: 실제 API 연동 시 아래 주석 해제
-    // try {
-    //   const res = await fetch('/api/v1/neoliz/catch/submit', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-    //     },
-    //     body: JSON.stringify({
-    //       gameId, results: allResults, totalScore,
-    //       maxCombo: maxComb, perfectCount, goodCount, missCount, abandoned: false,
-    //     }),
-    //   })
-    //   const data = await res.json()
-    //   setFinalResult({ ...data.data, totalScore, maxCombo: maxComb, perfectCount, goodCount, missCount })
-    // } catch {
-    //   setFinalResult({ totalScore, maxCombo: maxComb, perfectCount, goodCount, missCount })
-    // }
+    try {
+      const res = await fetch('/api/v1/neoliz/catch/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader(),
+        },
+        body: JSON.stringify({
+          gameId,
+          results: allResults,
+          totalScore,
+          maxCombo: maxComb,
+          perfectCount,
+          goodCount,
+          missCount,
+          abandoned: false,
+        }),
+      })
+      const data = await res.json()
+      setFinalResult({
+        totalScore,
+        maxCombo: maxComb,
+        perfectCount,
+        goodCount,
+        missCount,
+        myResult: data.data.myResult,
+        ranking: data.data.ranking,
+      })
+    } catch {
+      // 제출 실패 시에도 클라이언트 집계 결과로 결과 화면 표시
+      setFinalResult({ totalScore, maxCombo: maxComb, perfectCount, goodCount, missCount })
+    }
 
-    setFinalResult({
-      totalScore, maxCombo: maxComb, perfectCount, goodCount, missCount,
-      myResult: {
-        isPersonalBest: totalScore > 500,
-        previousBestScore: 500,
-        isInRanking: totalScore > 800,
-        remainingPlays: 2,
-      },
-    })
     setPhase(PHASE.RESULT)
   }
 
@@ -287,12 +293,10 @@ export default function MojiLand() {
         *, *::before, *::after { box-sizing: border-box; }
       `}</style>
 
-      {/* 배경 영상 */}
       <video autoPlay loop muted playsInline style={s.bgVideo}>
         <source src={neonGridVideo} type="video/mp4" />
       </video>
 
-      {/* 사운드 아이콘 */}
       <img src={soundIcon} alt="sound" style={s.soundIcon}
         onError={e => { e.target.style.display = 'none' }} />
 
@@ -318,7 +322,6 @@ export default function MojiLand() {
         {/* ── 게임 진행 ── */}
         {phase === PHASE.GAME && (
           <div style={s.gameWrap}>
-            {/* 좌측 스코어보드 */}
             <div style={s.scoreboard}>
               <p style={s.scoreLabel}>SCORE</p>
               <p style={s.scoreVal}>{score}</p>
@@ -326,7 +329,6 @@ export default function MojiLand() {
               <p style={s.comboVal}>{combo}</p>
             </div>
 
-            {/* 우측 게임 영역 */}
             <div style={s.gameArea}>
               <p style={s.roundLabel}>Round {currentRound + 1} / 10</p>
 
@@ -427,7 +429,6 @@ export default function MojiLand() {
   )
 }
 
-// 스타일
 const s = {
   wrap: {
     display: 'flex', flexDirection: 'column',
@@ -450,8 +451,6 @@ const s = {
     minHeight: '100vh',
     padding: '40px 20px',
   },
-
-  // 대기화면
   waitingBox: {
     width: '100%', maxWidth: 620,
     border: `2px solid ${NEON}`,
@@ -493,8 +492,6 @@ const s = {
     fontFamily: FONT,
     letterSpacing: 2,
   },
-
-  // 카운트다운
   countdownWrap: {
     display: 'flex', justifyContent: 'center', alignItems: 'center',
   },
@@ -502,8 +499,6 @@ const s = {
     fontSize: 'clamp(90px, 18vw, 180px)', fontWeight: 'bold',
     color: NEON, textShadow: `0 0 40px ${NEON}`, margin: 0,
   },
-
-  // 게임 진행
   gameWrap: {
     display: 'flex', gap: 'clamp(20px, 3vw, 48px)',
     width: '100%', maxWidth: 1100,
@@ -600,8 +595,6 @@ const s = {
     fontFamily: FONT, letterSpacing: 4,
     marginTop: 'auto',
   },
-
-  // 결과화면
   resultBox: {
     width: '100%', maxWidth: 520,
     border: `2px solid ${NEON}`,
@@ -645,14 +638,8 @@ const s = {
 function RankingPanel({ rankingData, onReplay, onClose }) {
   const myNickname = localStorage.getItem('nickname')
 
-  const top5 = rankingData?.top5 ?? [
-    { rank: 1, nickname: '민규', score: 50000, isMe: false },
-    { rank: 2, nickname: '주희', score: 39000, isMe: false },
-    { rank: 3, nickname: '주연', score: 32000, isMe: false },
-    { rank: 4, nickname: '종윤', score: 30000, isMe: false },
-    { rank: 5, nickname: '윤지', score: 21000, isMe: false },
-  ]
-  const me = rankingData?.me ?? { rank: 398, nickname: myNickname ?? '나', score: 90 }
+  const top5 = rankingData?.top5 ?? []
+  const me = rankingData?.me ?? null
   const showMyRow = me && !top5.some(r => r.isMe)
 
   const top3 = top5.slice(0, 3)
@@ -662,20 +649,27 @@ function RankingPanel({ rankingData, onReplay, onClose }) {
     <div style={sr.box}>
       <p style={sr.weekLabel}>이모지 캐치 주간 랭킹</p>
 
-      <div style={sr.podium}>
-        {top3[1] && <PodiumCard data={top3[1]} />}
-        {top3[0] && <PodiumCard data={top3[0]} isFirst />}
-        {top3[2] && <PodiumCard data={top3[2]} />}
-      </div>
+      {top3.length > 0 && (
+        <div style={sr.podium}>
+          {top3[1] && <PodiumCard data={top3[1]} />}
+          {top3[0] && <PodiumCard data={top3[0]} isFirst />}
+          {top3[2] && <PodiumCard data={top3[2]} />}
+        </div>
+      )}
 
       <div style={sr.listWrap}>
         {rest.map(item => <RankRow key={item.rank} data={item} />)}
-        {showMyRow && (
+        {showMyRow && me && (
           <div style={{ marginTop: 8 }}>
-            <RankRow data={me} isMe />
+            <RankRow data={{ ...me, nickname: me.nickname ?? myNickname ?? '나' }} isMe />
           </div>
         )}
       </div>
+      {top5.length === 0 && (
+        <p style={{ color: NEON_TEXT, opacity: 0.5, fontFamily: FONT, fontSize: 14 }}>
+          랭킹 데이터를 불러올 수 없습니다.
+        </p>
+      )}
 
       <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
         <button style={sr.replayBtn} onClick={onReplay}>Replay</button>
