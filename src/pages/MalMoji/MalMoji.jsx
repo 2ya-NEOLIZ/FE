@@ -46,7 +46,7 @@ export default function MalMoji() {
         setAttempts(used)
         if (used >= 1) {
           setShowHintBtn(true)
-          fetchHint(q.quizId)
+          fetchHint()
         }
 
         if (q.isFinished) {
@@ -63,9 +63,9 @@ export default function MalMoji() {
     fetchQuiz()
   }, [])
 
-  const fetchHint = async (quizId) => {
+  const fetchHint = async () => {
     try {
-      const { data } = await api.post('/api/v1/neoliz/quiz/hint', { quizId })
+      const { data } = await api.post('/api/v1/neoliz/quiz/daily/hint')
       setHint(data.data.category)
     } catch (err) {
       console.error('힌트 불러오기 실패', err)
@@ -99,8 +99,7 @@ export default function MalMoji() {
   const handleSubmit = async () => {
     if (locked || !quiz || !input.trim()) return
     try {
-      const { data } = await api.post('/api/v1/neoliz/quiz/submit', {
-        quizId: quiz.quizId,
+      const { data } = await api.post('/api/v1/neoliz/quiz/daily/submit', {
         answer: input.trim(),
       })
       const result = data.data
@@ -119,7 +118,7 @@ export default function MalMoji() {
         const used = quiz.maxAttempts - result.remainingAttempts
         setAttempts(used)
         setShowHintBtn(true)
-        if (used === 1 && !hint) fetchHint(quiz.quizId)
+        if (used === 1 && !hint) fetchHint()
         if (result.isFinished) {
           setLocked(true)
           setShowHint(true)
@@ -141,8 +140,7 @@ export default function MalMoji() {
 
   const confirmGiveUp = async () => {
     try {
-      const { data } = await api.post('/api/v1/neoliz/quiz/submit', {
-        quizId: quiz.quizId,
+      const { data } = await api.post('/api/v1/neoliz/quiz/daily/submit', {
         isGivenUp: true,
       })
       if (data.data?.answer) setRevealedAnswer(data.data.answer)
