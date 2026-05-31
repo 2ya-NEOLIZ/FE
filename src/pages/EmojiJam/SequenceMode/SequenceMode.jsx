@@ -120,17 +120,32 @@ export default function SequenceMode() {
         return
       }
       setPlayingIdx(filled[step].i)
-      // soundUrl로 실제 오디오 재생
+
       if (filled[step].emoji?.soundUrl) {
         const audio = new Audio(filled[step].emoji.soundUrl)
+        audio.playbackRate = filled[step].multiplier ?? 1
+        audio.addEventListener('loadedmetadata', () => {
+          const duration = (audio.duration / (filled[step].multiplier ?? 1)) * 1000
+          playTimerRef.current = setTimeout(() => {
+            step++
+            next()
+          }, duration)
+        })
+        // loadedmetadata가 안 뜨는 경우 폴백
+        audio.addEventListener('error', () => {
+          playTimerRef.current = setTimeout(() => {
+            step++
+            next()
+          }, 800)
+        })
         audio.play().catch(() => {})
+      } else {
+        // soundUrl 없는 경우 기본 800ms
+        playTimerRef.current = setTimeout(() => {
+          step++
+          next()
+        }, 800)
       }
-      // multiplier 기반 재생 간격 (기본 800ms 기준)
-      const interval = 800 * (filled[step].multiplier ?? 1)
-      playTimerRef.current = setTimeout(() => {
-        step++
-        next()
-      }, interval)
     }
     next()
   }
