@@ -10,8 +10,8 @@ const FONT = 'NeoDunggeunmo, monospace'
 const BG = '#060e0b'
 const GOLD = '#f5c518'
 
-const SCORE = { PERFECT: 100, GOOD: 50, MISS: 0 }
-const COMBO_BONUS = 10
+const SCORE = { PERFECT: 50, GOOD: 30, MISS: 0 }
+const MAX_COMBO_BONUS = 5  // maxCombo × 5점
 
 const PHASE = {
   WAITING: 'waiting',
@@ -187,7 +187,6 @@ export default function MojiLand() {
     if (markerRef.current) markerRef.current.style.left = '0px'
     setJudgment(null)
 
-    // 라운드 시작 시 사운드 재생
     if (rounds[currentRound].soundUrl) {
       const audio = new Audio(rounds[currentRound].soundUrl)
       audio.play().catch(() => {})
@@ -213,7 +212,9 @@ export default function MojiLand() {
     else judge = 'MISS'
 
     const newCombo = judge === 'MISS' ? 0 : combo + 1
-    const roundScore = SCORE[judge] + (judge !== 'MISS' ? newCombo * COMBO_BONUS : 0)
+    // 라운드 점수: 순수 판정 점수만 (콤보 보너스 미포함)
+    const roundScore = SCORE[judge]
+    // 화면 표시용 점수: 판정 점수 누적 (콤보 보너스는 게임 종료 시 합산)
     const newScore = score + roundScore
     const newMaxCombo = Math.max(maxCombo, newCombo)
 
@@ -225,7 +226,10 @@ export default function MojiLand() {
 
     setTimeout(() => {
       if (currentRound + 1 >= rounds.length) {
-        submitResult(newScore, newMaxCombo, [...results, { round: currentRound + 1, judgment: judge, score: roundScore }])
+        const allResults = [...results, { round: currentRound + 1, judgment: judge, score: roundScore }]
+        // totalScore = 라운드 점수 합 + maxCombo × 5
+        const comboBonus = newMaxCombo * MAX_COMBO_BONUS
+        submitResult(newScore + comboBonus, newMaxCombo, allResults)
       } else {
         setCurrentRound(r => r + 1)
       }
@@ -267,7 +271,6 @@ export default function MojiLand() {
         ranking: data.data.ranking,
       })
     } catch {
-      // 제출 실패 시에도 클라이언트 집계 결과로 결과 화면 표시
       setFinalResult({ totalScore, maxCombo: maxComb, perfectCount, goodCount, missCount })
     }
 
@@ -302,7 +305,6 @@ export default function MojiLand() {
 
       <div style={s.page}>
 
-        {/* ── 대기화면 ── */}
         {phase === PHASE.WAITING && (
           <div style={s.waitingBox}>
             <h1 style={s.title}>MOJILAND</h1>
@@ -312,14 +314,12 @@ export default function MojiLand() {
           </div>
         )}
 
-        {/* ── 카운트다운 ── */}
         {phase === PHASE.COUNTDOWN && (
           <div style={s.countdownWrap}>
             <p style={s.countdownNum}>{countdown === 0 ? 'START!' : countdown}</p>
           </div>
         )}
 
-        {/* ── 게임 진행 ── */}
         {phase === PHASE.GAME && (
           <div style={s.gameWrap}>
             <div style={s.scoreboard}>
@@ -386,7 +386,6 @@ export default function MojiLand() {
           </div>
         )}
 
-        {/* ── 결과 1단계 ── */}
         {phase === PHASE.RESULT && finalResult && (
           <div style={s.resultBox}>
             <p style={s.gameOver}>GAME OVER</p>
@@ -399,7 +398,6 @@ export default function MojiLand() {
           </div>
         )}
 
-        {/* ── 결과 2단계: 랭킹 ── */}
         {phase === PHASE.RANKING && (
           <RankingPanel
             rankingData={finalResult?.ranking ?? null}
@@ -632,9 +630,6 @@ const s = {
   },
 }
 
-// ──────────────────────────────────────
-// 랭킹 패널
-// ──────────────────────────────────────
 function RankingPanel({ rankingData, onReplay, onClose }) {
   const myNickname = localStorage.getItem('nickname')
 
