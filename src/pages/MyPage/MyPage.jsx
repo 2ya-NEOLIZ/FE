@@ -93,21 +93,21 @@ export default function MyPage() {
   }
 
   const handleProfileImageChange = async (e) => {
-  const file = e.target.files[0]
-  if (!file) return
-  const formData = new FormData()
-  formData.append('profileImage', file)
-  try {
-    const { data } = await api.patch('/api/v1/neoliz/users/me/profile-image', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    if (data.data?.profileImageUrl) {
-      setUserInfo(prev => ({ ...prev, profileImageUrl: data.data.profileImageUrl }))
+    const file = e.target.files[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('profileImage', file)
+    try {
+      const { data } = await api.patch('/api/v1/neoliz/users/me/profile-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      if (data.data?.profileImageUrl) {
+        setUserInfo(prev => ({ ...prev, profileImageUrl: data.data.profileImageUrl }))
+      }
+    } catch {
+      console.error('프로필 이미지 업로드 실패')
     }
-  } catch {
-    console.error('프로필 이미지 업로드 실패')
   }
-}
 
   const handleDelete = async (id) => {
     await api.delete(`/api/v1/neoliz/users/me/sequences/${id}`)
@@ -127,7 +127,65 @@ export default function MyPage() {
           font-family: 'NeoDunggeunmo';
           src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.3/NeoDunggeunmo.woff') format('woff');
         }
+        *, *::before, *::after { box-sizing: border-box; }
         .seq-row:hover { border-color: #1DED83 !important; z-index: 1; position: relative; }
+
+        @media (max-width: 768px) {
+          .mypage-title { font-size: 48px !important; top: 24px !important; }
+          .mypage-content {
+            flex-direction: column !important;
+            padding: 100px 16px 40px !important;
+            gap: 24px !important;
+            align-items: center !important;
+          }
+          .mypage-profile {
+            padding: 24px 32px !important;
+            width: 100% !important;
+            max-width: 480px !important;
+          }
+          .mypage-profile-img {
+            width: 120px !important;
+            height: 120px !important;
+          }
+          .mypage-nickname-btn {
+            font-size: 20px !important;
+            padding: 14px 0 !important;
+          }
+          .mypage-email {
+            font-size: 14px !important;
+          }
+          .mypage-studio {
+            width: 100% !important;
+            max-width: 480px !important;
+            padding-top: 0 !important;
+          }
+          .mypage-studio-title {
+            font-size: 18px !important;
+            padding: 14px 16px !important;
+          }
+          .seq-row {
+            padding: 18px 16px !important;
+          }
+          .seq-title {
+            font-size: 18px !important;
+          }
+          .seq-date {
+            font-size: 13px !important;
+          }
+          .detail-modal {
+            min-width: unset !important;
+            width: 90vw !important;
+            padding: 32px 24px !important;
+          }
+        }
+
+        @media (max-width: 400px) {
+          .mypage-title { font-size: 36px !important; }
+          .mypage-profile-img {
+            width: 96px !important;
+            height: 96px !important;
+          }
+        }
       `}</style>
 
       <video autoPlay loop muted style={s.bgVideo}>
@@ -137,7 +195,7 @@ export default function MyPage() {
       {/* 시퀀스 상세 모달 */}
       {selectedSeq && (
         <div style={s.overlay} onClick={() => { setSelectedSeq(null); setIsPlaying(false); clearTimeout(playTimerRef.current); setPlayingIdx(null) }}>
-          <div style={s.detailModal} onClick={e => e.stopPropagation()}>
+          <div className="detail-modal" style={s.detailModal} onClick={e => e.stopPropagation()}>
             <div style={s.detailTitle}>{selectedSeq.title}</div>
             <div style={s.detailDate}>{selectedSeq.date}</div>
             <div style={s.detailBtns}>
@@ -168,25 +226,26 @@ export default function MyPage() {
         borderColor="#ff4444"
       />
 
-      <h1 style={s.title}>My Page</h1>
+      <h1 className="mypage-title" style={s.title}>My Page</h1>
 
-      <div style={s.content}>
+      <div className="mypage-content" style={s.content}>
         {/* 프로필 */}
-        <div>
-          <div style={s.profile}>
-            <div style={s.profileImgWrap}>
-              <div style={s.profileImg}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+          <div className="mypage-profile" style={s.profile}>
+            <div className="mypage-profile-img-wrap" style={s.profileImgWrap}>
+              <div className="mypage-profile-img" style={s.profileImg}>
                 {userInfo?.profileImageUrl
                   ? <img src={userInfo.profileImageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 16 }} />
-                  : <span style={{ fontSize: 48 }}>👤</span>
+                  : <span style={{ fontSize: 'clamp(32px, 5vw, 48px)' }}>👤</span>
                 }
               </div>
               <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleProfileImageChange} />
               <button style={{ ...s.editImgBtn, cursor: 'pointer', opacity: 1 }} onClick={() => fileInputRef.current.click()} title="프로필 이미지 변경">✎</button>
             </div>
-            <span style={s.email}>{userInfo?.email}</span>
+            <span className="mypage-email" style={s.email}>{userInfo?.email}</span>
             {editingNick ? (
               <input
+                className="mypage-nickname-btn"
                 style={{ ...s.nicknamebtn, textAlign: 'center', outline: 'none', boxSizing: 'border-box', width: '100%', display: 'block' }}
                 size={1}
                 value={nickInput}
@@ -211,7 +270,7 @@ export default function MyPage() {
                 autoFocus
               />
             ) : (
-              <button style={s.nicknamebtn} onClick={() => { setNickInput(nickname); setEditingNick(true) }}>{nickname}</button>
+              <button className="mypage-nickname-btn" style={s.nicknamebtn} onClick={() => { setNickInput(nickname); setEditingNick(true) }}>{nickname}</button>
             )}
             {nickError && (
               <span style={{ color: '#ff4444', fontSize: 11, fontFamily: FONT, textAlign: 'center' }}>
@@ -223,18 +282,23 @@ export default function MyPage() {
         </div>
 
         {/* 시퀀스 목록 */}
-        <div style={s.studio}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={s.studioTitle}>MY EMOJI STUDIO</div>
+        <div className="mypage-studio" style={s.studio}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '10%' }}>
+            <div className="mypage-studio-title" style={s.studioTitle}>MY EMOJI STUDIO</div>
             {sequences.length === 0 ? (
               <div style={{ ...s.empty, justifyContent: 'center' }}>
-                <span style={{ color: NEON_TEXT, fontSize: 16 }}>아직 저장한 시퀀스가 없어요.</span>
+                <span style={{ color: NEON_TEXT, fontSize: 'clamp(13px, 1.4vw, 16px)' }}>아직 저장한 시퀀스가 없어요.</span>
                 <button style={s.createBtn} onClick={() => navigate('/emoji-jam/sequence')}>시퀀스 생성하기 &gt;</button>
               </div>
             ) : (
               <>
                 {currentItems.map((seq, i) => (
-                  <div key={seq.id} style={{ ...s.seqRow, borderRadius: i === currentItems.length - 1 ? '0 0 8px 8px' : 0 }} className="seq-row" onClick={() => { setSelectedSeq(seq); setIsPlaying(false) }}>
+                  <div
+                    key={seq.id}
+                    style={{ ...s.seqRow, borderRadius: i === currentItems.length - 1 ? '0 0 8px 8px' : 0 }}
+                    className="seq-row"
+                    onClick={() => { setSelectedSeq(seq); setIsPlaying(false) }}
+                  >
                     <div
                       style={s.seqNumBox}
                       onMouseEnter={() => setHoveredId(seq.id)}
@@ -246,8 +310,8 @@ export default function MyPage() {
                         : <span style={s.seqNum}>{(page - 1) * PAGE_SIZE + i + 1}</span>
                       }
                     </div>
-                    <span style={s.seqTitle}>{seq.title}</span>
-                    <span style={s.seqDate}>{seq.date}</span>
+                    <span className="seq-title" style={s.seqTitle}>{seq.title}</span>
+                    <span className="seq-date" style={s.seqDate}>{seq.date}</span>
                   </div>
                 ))}
                 <div style={s.pagination}>
@@ -269,25 +333,25 @@ export default function MyPage() {
 const s = {
   wrap:         { display: 'flex', flexDirection: 'column', background: '#060e0b', fontFamily: FONT, color: NEON, position: 'relative', minHeight: '100vh', overflow: 'visible' },
   bgVideo:      { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, opacity: 0.7 },
-  title:        { position: 'absolute', top: 64, left: '50%', transform: 'translateX(-50%)', fontSize: 80, color: NEON, fontFamily: FONT, zIndex: 2, letterSpacing: 4, margin: 0 },
+  title:        { position: 'absolute', top: 64, left: '50%', transform: 'translateX(-50%)', fontSize: 80, color: NEON, fontFamily: FONT, zIndex: 2, letterSpacing: 4, margin: 0, whiteSpace: 'nowrap' },
   content:      { position: 'relative', marginTop: 32, zIndex: 1, display: 'flex', flexDirection: 'row', overflow: 'visible', alignItems: 'flex-start', justifyContent: 'center', flex: 1, gap: 60, padding: '180px 4% 40px', flexWrap: 'wrap' },
   profile:      { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, background: 'rgba(0,0,0,0.5)', border: `1px solid #1a3a2e`, borderRadius: '20px 20px 0 0', padding: '40px 60px' },
   profileImg:   { width: 320, height: 320, borderRadius: 16, border: `3px solid ${NEON}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0E0E17', overflow: 'hidden' },
-  editImgBtn:   { position: 'absolute', bottom: 16, right: 16, background: '#0E0E17', border: `2px solid ${NEON}`, borderRadius: '50%', width: 32, height: 32, color: NEON, fontSize: 16, opacity: 0.8, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  editImgBtn:   { position: 'absolute', bottom: 8, right: 8, background: '#0E0E17', border: `2px solid ${NEON}`, borderRadius: '50%', width: 32, height: 32, color: NEON, fontSize: 16, opacity: 0.8, display: 'flex', alignItems: 'center', justifyContent: 'center' },
   profileImgWrap: { position: 'relative' },
-  email:        { color: NEON_TEXT, fontSize: 22, fontFamily: FONT },
+  email:        { color: NEON_TEXT, fontSize: 22, fontFamily: FONT, wordBreak: 'break-all', textAlign: 'center' },
   profileBar:   { height: 8, background: NEON, borderRadius: '0 0 20px 20px' },
   nicknamebtn:  { width: '100%', padding: '22px 0', background: '#0E0E17', border: `2px solid ${NEON}`, borderRadius: 12, color: NEON_TEXT, fontFamily: FONT, fontSize: 32, cursor: 'pointer' },
-  studio:       { display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%', maxWidth: 900, marginTop: 0, alignSelf: 'stretch', paddingTop: '2%' },
-  studioTitle:  { fontSize: 26, color: NEON_TEXT,  padding: '18px 24px', letterSpacing: 2, border: `1px solid #1a3a2e`, borderRadius: '8px 8px 0 0', background: 'rgba(17,17,17,0.8)' },
+  studio:       { display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%', maxWidth: 900, marginTop: 0, alignSelf: 'stretch', paddingTop: 0 },
+  studioTitle:  { fontSize: 26, color: NEON_TEXT, padding: '18px 24px', letterSpacing: 2, border: `1px solid #1a3a2e`, borderRadius: '8px 8px 0 0', background: 'rgba(17,17,17,0.8)' },
   seqRow:       { display: 'flex', alignItems: 'center', gap: 16, padding: '28px 24px', border: `1px solid #1a3a2e`, background: 'rgba(0,0,0,0.5)', cursor: 'pointer', borderRadius: 0 },
   seqNum:       { color: NEON_TEXT, fontSize: 22, width: 24, textAlign: 'center' },
   seqNumBox:    { width: 32, height: 32, background: 'rgba(0,0,0,0.5)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 },
   seqTitle:     { color: NEON_TEXT, fontSize: 26, flex: 1 },
-  seqDate:      { color: NEON_TEXT, fontSize: 20, opacity: 0.5 },
+  seqDate:      { color: NEON_TEXT, fontSize: 20, opacity: 0.5, flexShrink: 0 },
   pagination:   { display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 16 },
   pageBtn:      { background: 'transparent', border: 'none', color: NEON_TEXT, fontFamily: FONT, cursor: 'pointer', fontSize: 24 },
-  empty:        { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, padding: '60px 24px', background: 'rgba(0,0,0,0.3)', border: `1px solid #1a3a2e` },
+  empty:        { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, padding: '60px 24px', background: 'rgba(0,0,0,0.3)', border: `1px solid #1a3a2e`, paddingTop: '15%' },
   createBtn:    { padding: '10px 32px', background: '#0E0E17', border: `2px solid ${NEON}`, borderRadius: 12, color: NEON_TEXT, fontFamily: FONT, cursor: 'pointer', fontSize: 16 },
   overlay:      { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 },
   detailModal:  { background: '#0a1a0f', border: `2px solid ${NEON}`, borderRadius: 20, padding: '40px 48px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, minWidth: 360, position: 'relative', boxShadow: '0 0 30px rgba(0,255,128,0.2)' },
