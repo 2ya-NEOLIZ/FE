@@ -251,7 +251,7 @@ function RankCard({ data, isFirst = false, myNickname, animDelay = 0 }) {
       animation: `fadeUpPodium 0.55s cubic-bezier(.22,.68,0,1.2) ${animDelay}s both`,
     }}>
       <span style={{
-        fontSize: isFirst ? 52 : 40,
+        fontSize: isFirst ? 64 : 50,
         lineHeight: 1,
         marginBottom: 4,
         filter: `drop-shadow(0 0 8px ${theme.color})`,
@@ -329,7 +329,7 @@ function RankCard({ data, isFirst = false, myNickname, animDelay = 0 }) {
           fontSize: isFirst ? 17 : 14,
           opacity: 0.85,
         }}>
-          ▲ {data.score?.toLocaleString()}
+          ▲ {data.score != null ? Number(data.score).toLocaleString() : '—'}
         </span>
       </div>
     </div>
@@ -418,7 +418,7 @@ function RankRow({ data, isMe = false, myNickname, index = 0 }) {
         fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
         letterSpacing: 1,
       }}>
-        ▲ {data.score?.toLocaleString()}
+        ▲ {data.score != null ? Number(data.score).toLocaleString() : '—'}
       </span>
     </div>
   )
