@@ -251,7 +251,7 @@ function RankCard({ data, isFirst = false, myNickname, animDelay = 0 }) {
       animation: `fadeUpPodium 0.55s cubic-bezier(.22,.68,0,1.2) ${animDelay}s both`,
     }}>
       <span style={{
-        fontSize: isFirst ? 42 : 32,
+        fontSize: isFirst ? 52 : 40,
         lineHeight: 1,
         marginBottom: 4,
         filter: `drop-shadow(0 0 8px ${theme.color})`,
