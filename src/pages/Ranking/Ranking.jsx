@@ -329,7 +329,7 @@ function RankCard({ data, isFirst = false, myNickname, animDelay = 0 }) {
           fontSize: isFirst ? 17 : 14,
           opacity: 0.85,
         }}>
-          ▲ {data.score != null ? Number(data.score).toLocaleString() : '—'}
+          ▲ {Number(data.score ?? 0).toLocaleString()}
         </span>
       </div>
     </div>
@@ -418,7 +418,7 @@ function RankRow({ data, isMe = false, myNickname, index = 0 }) {
         fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
         letterSpacing: 1,
       }}>
-        ▲ {data.score != null ? Number(data.score).toLocaleString() : '—'}
+        ▲ {Number(data.score ?? 0).toLocaleString()}
       </span>
     </div>
   )
