@@ -10,6 +10,26 @@ const NEON_TEXT = '#1EC770'
 const FONT = 'NeoDunggeunmo, monospace'
 
 const PAGE_SIZE = 4
+// compressImage 함수 추가 (MyPage 컴포넌트 밖에 선언)
+  const compressImage = (file, maxSize, quality) => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      const url = URL.createObjectURL(file)
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        let w = img.width, h = img.height
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = h * maxSize / w; w = maxSize }
+          else { w = w * maxSize / h; h = maxSize }
+        }
+        canvas.width = w; canvas.height = h
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+        canvas.toBlob(resolve, 'image/jpeg', quality)
+        URL.revokeObjectURL(url)
+      }
+      img.src = url
+    })
+  }
 
 export default function MyPage() {
   const navigate = useNavigate()
@@ -95,8 +115,9 @@ export default function MyPage() {
   const handleProfileImageChange = async (e) => {
     const file = e.target.files[0]
     if (!file) return
+    const compressed = await compressImage(file, 800, 0.8)
     const formData = new FormData()
-    formData.append('profileImage', file)
+    formData.append('profileImage', compressed)
     try {
       const { data } = await api.patch('/api/v1/neoliz/users/me/profile-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
