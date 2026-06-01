@@ -117,7 +117,7 @@ export default function MyPage() {
     if (!file) return
     const compressed = await compressImage(file, 800, 0.8)
     const formData = new FormData()
-    formData.append('profileImage', compressed)
+    formData.append('profileImage', compressed, 'profile.jpg')
     try {
       const { data } = await api.patch('/api/v1/neoliz/users/me/profile-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
