@@ -16,6 +16,7 @@ const FONT = 'NeoDunggeunmo, monospace'
 export default function MalMoji() {
   const [quiz, setQuiz] = useState(null)
   const [hint, setHint] = useState(null)
+  const [hintText, setHintText] = useState(null)   // hint 응답의 hint 필드
   const [revealedAnswer, setRevealedAnswer] = useState(null)
   const [score, setScore] = useState(null)
 
@@ -67,7 +68,9 @@ export default function MalMoji() {
     try {
       const { data } = await api.post('/api/v1/neoliz/quiz/daily/hint')
       setHint(data.data.category)
+      setHintText(data.data.hint)   // hint 필드 저장
     } catch (err) {
+      // 이미 힌트를 사용했거나 409 등의 경우 무시
       console.error('힌트 불러오기 실패', err)
     }
   }
@@ -101,6 +104,7 @@ export default function MalMoji() {
     try {
       const { data } = await api.post('/api/v1/neoliz/quiz/daily/submit', {
         answer: input.trim(),
+        isGivenUp: false,   // 400 방지: 필수 필드 추가
       })
       const result = data.data
 
@@ -156,7 +160,12 @@ export default function MalMoji() {
   }
 
   const maxAttempts = quiz?.maxAttempts ?? 5
-  const hintDisplay = hint ?? (showHintBtn ? '' : '1회 오답 후 힌트가 공개됩니다.')
+
+  // hint 표시: category + hint 텍스트가 있으면 같이 표시
+  const hintDisplay = hint != null
+    ? (hintText ? `${hint} · ${hintText}` : hint)
+    : (showHintBtn ? '' : '1회 오답 후 힌트가 공개됩니다.')
+
   const answerDisplay = revealedAnswer ? `정답: ${revealedAnswer}` : input
 
   return (
