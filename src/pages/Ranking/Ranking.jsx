@@ -465,6 +465,7 @@ const s = {
     fontSize: 22,
     letterSpacing: 6,
     margin: '0 0 8px',
+    marginTop: '-48px',
   },
   weekNum: {
     color: '#fff',
@@ -477,7 +478,7 @@ const s = {
     fontSize: 48,
     fontWeight: 'bold',
     letterSpacing: 4,
-    margin: '0 0 40px',
+    margin: '0 0 56px',
     textShadow: '0 0 24px rgba(29,237,131,0.5)',
   },
   loadingText: {
