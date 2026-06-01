@@ -15,7 +15,7 @@ const RANK_THEME = {
     glow: '0 0 32px rgba(255,215,0,0.8), 0 0 64px rgba(255,215,0,0.4)',
     border: '2px solid #FFD700',
     bgGradient: 'linear-gradient(160deg, rgba(255,215,0,0.2) 0%, rgba(5,15,10,0.95) 65%)',
-    podiumHeight: 80,
+    podiumHeight: 100,
     podiumColor: 'rgba(255,215,0,0.25)',
     podiumBorder: 'rgba(255,215,0,0.6)',
   },
@@ -25,7 +25,7 @@ const RANK_THEME = {
     glow: '0 0 24px rgba(192,192,192,0.7), 0 0 48px rgba(192,192,192,0.3)',
     border: '2px solid #C0C0C0',
     bgGradient: 'linear-gradient(160deg, rgba(192,192,192,0.15) 0%, rgba(5,15,10,0.95) 65%)',
-    podiumHeight: 52,
+    podiumHeight: 66,
     podiumColor: 'rgba(192,192,192,0.18)',
     podiumBorder: 'rgba(192,192,192,0.5)',
   },
@@ -35,7 +35,7 @@ const RANK_THEME = {
     glow: '0 0 24px rgba(205,127,50,0.7), 0 0 48px rgba(205,127,50,0.3)',
     border: '2px solid #CD7F32',
     bgGradient: 'linear-gradient(160deg, rgba(205,127,50,0.15) 0%, rgba(5,15,10,0.95) 65%)',
-    podiumHeight: 36,
+    podiumHeight: 44,
     podiumColor: 'rgba(205,127,50,0.18)',
     podiumBorder: 'rgba(205,127,50,0.5)',
   },
@@ -210,7 +210,7 @@ function PodiumBase({ rank }) {
   const theme = RANK_THEME[rank]
   return (
     <div style={{
-      width: rank === 1 ? 160 : 120,
+      width: rank === 1 ? 196 : 148,
       height: theme.podiumHeight,
       background: theme.podiumColor,
       border: `2px solid ${theme.podiumBorder}`,
@@ -224,7 +224,7 @@ function PodiumBase({ rank }) {
     }}>
       <span style={{
         color: theme.color,
-        fontSize: rank === 1 ? 28 : 22,
+        fontSize: rank === 1 ? 34 : 26,
         fontWeight: 'bold',
         fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
         textShadow: `0 0 10px ${theme.color}`,
@@ -239,7 +239,7 @@ function PodiumBase({ rank }) {
 function RankCard({ data, isFirst = false, myNickname, animDelay = 0 }) {
   const isMe = data.isMe || data.nickname === myNickname
   const theme = RANK_THEME[data.rank]
-  const imgSize = isFirst ? 100 : 76
+  const imgSize = isFirst ? 124 : 96
   const cardColor = isMe ? ME_COLOR : theme.color
 
   return (
@@ -251,7 +251,7 @@ function RankCard({ data, isFirst = false, myNickname, animDelay = 0 }) {
       animation: `fadeUpPodium 0.55s cubic-bezier(.22,.68,0,1.2) ${animDelay}s both`,
     }}>
       <span style={{
-        fontSize: isFirst ? 34 : 26,
+        fontSize: isFirst ? 42 : 32,
         lineHeight: 1,
         marginBottom: 4,
         filter: `drop-shadow(0 0 8px ${theme.color})`,
@@ -318,7 +318,7 @@ function RankCard({ data, isFirst = false, myNickname, animDelay = 0 }) {
         <span style={{
           ...s.cardNickname,
           color: cardColor,
-          fontSize: isFirst ? 20 : 15,
+          fontSize: isFirst ? 24 : 18,
         }}>
           {data.nickname}
         </span>
@@ -326,7 +326,7 @@ function RankCard({ data, isFirst = false, myNickname, animDelay = 0 }) {
         <span style={{
           ...s.cardScore,
           color: cardColor,
-          fontSize: isFirst ? 15 : 12,
+          fontSize: isFirst ? 17 : 14,
           opacity: 0.85,
         }}>
           ▲ {data.score?.toLocaleString()}
@@ -358,11 +358,11 @@ function RankRow({ data, isMe = false, myNickname, index = 0 }) {
         display: 'flex',
         alignItems: 'center',
         gap: 8,
-        minWidth: 64,
+        minWidth: 72,
       }}>
         <div style={{
           width: 4,
-          height: 28,
+          height: 34,
           borderRadius: 2,
           background: rankColor,
           boxShadow: `0 0 8px ${rankColor}`,
@@ -370,7 +370,7 @@ function RankRow({ data, isMe = false, myNickname, index = 0 }) {
         }} />
         <span style={{
           color: rankColor,
-          fontSize: 20,
+          fontSize: 24,
           fontWeight: 'bold',
           textShadow: `0 0 8px ${rankColor}`,
           fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
@@ -380,8 +380,8 @@ function RankRow({ data, isMe = false, myNickname, index = 0 }) {
       </div>
 
       <div style={{
-        width: 36,
-        height: 36,
+        width: 46,
+        height: 46,
         borderRadius: 8,
         overflow: 'hidden',
         border: `2px solid ${rankColor}`,
@@ -395,7 +395,7 @@ function RankRow({ data, isMe = false, myNickname, index = 0 }) {
         {data.profileImageUrl ? (
           <img src={data.profileImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
-          <PixelAvatar size={36} color={rankColor} />
+          <PixelAvatar size={46} color={rankColor} />
         )}
       </div>
 
@@ -403,7 +403,7 @@ function RankRow({ data, isMe = false, myNickname, index = 0 }) {
 
       <span style={{
         color: rankColor,
-        fontSize: 17,
+        fontSize: 20,
         flex: 1,
         fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
         letterSpacing: 1,
@@ -413,7 +413,7 @@ function RankRow({ data, isMe = false, myNickname, index = 0 }) {
 
       <span style={{
         color: rankColor,
-        fontSize: 16,
+        fontSize: 19,
         opacity: 0.85,
         fontFamily: '"NeoDunggeunmo", "Courier New", monospace',
         letterSpacing: 1,
@@ -455,29 +455,29 @@ const s = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     minHeight: '100vh',
-    padding: '32px 20px 40px',
+    padding: '80px 20px 48px',
     boxSizing: 'border-box',
     gap: 0,
   },
   weekLabel: {
-    fontSize: 18,
+    fontSize: 22,
     letterSpacing: 6,
-    margin: '0 0 6px',
+    margin: '0 0 8px',
   },
   weekNum: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     margin: '0 6px',
   },
   title: {
     color: NEON,
-    fontSize: 38,
+    fontSize: 48,
     fontWeight: 'bold',
     letterSpacing: 4,
-    margin: '0 0 32px',
+    margin: '0 0 40px',
     textShadow: '0 0 24px rgba(29,237,131,0.5)',
   },
   loadingText: {
@@ -487,8 +487,8 @@ const s = {
   podiumWrap: {
     display: 'flex',
     alignItems: 'flex-end',
-    gap: 12,
-    marginBottom: 28,
+    gap: 20,
+    marginBottom: 32,
   },
   podiumSlot: {
     display: 'flex',
@@ -499,15 +499,15 @@ const s = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    borderRadius: 16,
+    borderRadius: 20,
     position: 'relative',
-    padding: '14px 14px 12px',
+    padding: '18px 18px 14px',
   },
   cardFirst: {
-    width: 168,
+    width: 210,
   },
   cardNormal: {
-    width: 130,
+    width: 162,
   },
   // me 배지 — 오른쪽 상단, 캡슐 스타일
   meBadge: {
@@ -536,24 +536,24 @@ const s = {
   listWrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 10,
+    gap: 12,
     width: '100%',
-    maxWidth: 560,
+    maxWidth: 660,
   },
   myRowWrap: {
     width: '100%',
-    maxWidth: 560,
-    marginTop: 14,
-    paddingTop: 14,
+    maxWidth: 660,
+    marginTop: 16,
+    paddingTop: 16,
     borderTop: '1px dashed rgba(175,255,218,0.2)',
   },
   row: {
     display: 'flex',
     alignItems: 'center',
     border: '2px solid',
-    borderRadius: 20,       // 14 → 20
-    padding: '12px 22px',   // 좀 더 넉넉하게
-    gap: 14,
+    borderRadius: 22,
+    padding: '14px 26px',
+    gap: 16,
     transition: 'box-shadow 0.2s',
   },
   // me 태그 — 캡슐 스타일
