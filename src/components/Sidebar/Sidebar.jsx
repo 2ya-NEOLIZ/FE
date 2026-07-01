@@ -130,8 +130,30 @@ export default function Sidebar() {
               })}
             </div>
 
-            {/* 로그아웃 버튼 (하단 고정) */}
+            {/* 마이페이지 & 로그아웃 버튼 (하단 고정) */}
             <div style={s.bottomWrap}>
+              <button
+                onClick={() => navigate('/mypage')}
+                style={s.mypageBtn}
+                title="마이페이지"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={NEON}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={s.mypageIcon}
+                >
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+                </svg>
+                <span style={s.mypageLabel}>마이페이지</span>
+              </button>
+
               <button
                 onClick={handleLogout}
                 style={s.logoutBtn}
@@ -238,13 +260,38 @@ const s = {
     whiteSpace: 'nowrap',
   },
 
-  // 하단 로그아웃
   bottomWrap: {
     width: '100%',
     display: 'flex',
-    justifyContent: 'center',
+    flexDirection: 'column',
+    alignItems: 'center',
     paddingBottom: 20,
     marginTop: 'auto',
+  },
+  mypageBtn: {
+    width: 60,
+    borderRadius: 12,
+    background: 'transparent',
+    color: NEON,
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    padding: '8px 0',
+    marginBottom: 6,
+    transition: 'all 0.2s',
+    fontFamily: 'NeoDunggeunmo, monospace',
+  },
+  mypageIcon: {
+    display: 'block',
+  },
+  mypageLabel: {
+    fontSize: 9,
+    whiteSpace: 'nowrap',
+    lineHeight: 1.2,
+    color: NEON,
   },
   logoutBtn: {
     width: 60,
